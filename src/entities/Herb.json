@@ -163,6 +163,15 @@
       "type": "boolean",
       "default": false,
       "description": "Whether to feature on homepage"
+    },
+    "submitted_by": {
+      "type": "string",
+      "description": "Name of person who submitted this remedy"
+    },
+    "community_contributed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this was contributed by community"
     }
   },
   "required": [

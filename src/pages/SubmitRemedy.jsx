@@ -7,12 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Send, Loader2, CheckCircle, AlertTriangle, Info } from "lucide-react";
+import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function SubmitRemedy() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
+    common_name: "",
+    botanical_name: "",
+    local_names: "",
     herbs_used: "",
     health_condition: "",
     preparation_method: "",
@@ -22,9 +25,19 @@ export default function SubmitRemedy() {
     submitter_name: "",
     submitter_contact: ""
   });
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [aiModerating, setAiModerating] = useState(false);
   const [moderationResult, setModerationResult] = useState(null);
   const [submissionComplete, setSubmissionComplete] = useState(false);
+
+  const createHerbMutation = useMutation({
+    mutationFn: (herbData) => base44.entities.Herb.create(herbData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['herbs'] });
+      queryClient.invalidateQueries({ queryKey: ['featured-herbs'] });
+    },
+  });
 
   const createRemedyMutation = useMutation({
     mutationFn: (remedyData) => base44.entities.RemedySubmission.create(remedyData),
@@ -32,6 +45,21 @@ export default function SubmitRemedy() {
       queryClient.invalidateQueries({ queryKey: ['remedies'] });
     },
   });
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setUploadedImage(file_url);
+    } catch (error) {
+      console.error("Image upload error:", error);
+      alert("Failed to upload image. Please try again.");
+    }
+    setUploadingImage(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,7 +70,9 @@ export default function SubmitRemedy() {
       const moderationResponse = await base44.integrations.Core.InvokeLLM({
         prompt: `As an expert herbalist and medical safety validator, analyze this herbal remedy submission for scientific credibility and safety:
 
-Herbs Used: ${formData.herbs_used}
+Common Name: ${formData.common_name}
+Botanical Name: ${formData.botanical_name}
+Local Names: ${formData.local_names}
 Health Condition: ${formData.health_condition}
 Preparation Method: ${formData.preparation_method}
 Dosage: ${formData.dosage}
@@ -54,44 +84,100 @@ Evaluate:
 2. Safety concerns - are there any red flags, contraindications, or dangerous interactions?
 3. Misleading claims - are the claimed effects realistic or exaggerated?
 4. Risk level - classify as Low, Moderate, High, or Critical
-5. Whether expert review is needed
-6. Recommendation for approval status
+5. Recommendation for approval status
+6. Generate comprehensive herb information including benefits, compounds, safety warnings
 
-Provide thorough, evidence-based analysis focused on user safety.`,
+Provide thorough, evidence-based analysis focused on user safety. If approved, provide complete herb profile data.`,
         response_json_schema: {
           type: "object",
           properties: {
             moderation_status: {
               type: "string",
-              enum: ["Approved", "Flagged - Risk Identified", "Pending Review", "Rejected"]
+              enum: ["Approved", "Flagged - Risk Identified", "Rejected"]
             },
             risk_level: {
               type: "string",
               enum: ["Low", "Moderate", "High", "Critical"]
             },
+            safety_rating: {
+              type: "string",
+              enum: ["Generally Safe", "Use with Caution", "High Risk - Expert Guidance Required"]
+            },
             credibility_assessment: { type: "string" },
             safety_concerns: { type: "array", items: { type: "string" } },
             potential_interactions: { type: "array", items: { type: "string" } },
-            expert_review_required: { type: "boolean" },
             feedback_summary: { type: "string" },
-            recommendations: { type: "string" }
+            health_benefits: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  benefit: { type: "string" },
+                  evidence_level: { type: "string" }
+                }
+              }
+            },
+            conditions_treated: { type: "array", items: { type: "string" } },
+            contraindications: { type: "array", items: { type: "string" } },
+            side_effects: { type: "array", items: { type: "string" } },
+            drug_interactions: { type: "array", items: { type: "string" } },
+            major_compounds: { type: "array", items: { type: "string" } },
+            category: { type: "string" }
           }
         }
       });
 
       setModerationResult(moderationResponse);
 
-      // Create submission with AI moderation data
+      // Save to RemedySubmission for records
       const submissionData = {
-        ...formData,
         herbs_used: formData.herbs_used.split(',').map(h => h.trim()),
+        health_condition: formData.health_condition,
+        preparation_method: formData.preparation_method,
+        dosage: formData.dosage,
+        duration_of_use: formData.duration_of_use,
+        observed_effects: formData.observed_effects,
+        submitter_name: formData.submitter_name,
+        submitter_contact: formData.submitter_contact,
         moderation_status: moderationResponse.moderation_status,
         risk_level: moderationResponse.risk_level,
-        expert_review_required: moderationResponse.expert_review_required,
+        expert_review_required: false,
         ai_feedback: JSON.stringify(moderationResponse)
       };
 
       await createRemedyMutation.mutateAsync(submissionData);
+
+      // If approved, automatically create Herb entity
+      if (moderationResponse.moderation_status === "Approved") {
+        const herbData = {
+          common_name: formData.common_name,
+          botanical_name: formData.botanical_name,
+          local_names: formData.local_names ? formData.local_names.split(',').map(n => n.trim()) : [],
+          description: formData.observed_effects,
+          image_url: uploadedImage || "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&h=400&fit=crop",
+          region: "Africa", // Default, can be enhanced
+          category: moderationResponse.category || "Other",
+          health_benefits: moderationResponse.health_benefits || [],
+          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition],
+          preparation_methods: [{
+            method: "Traditional Method",
+            instructions: formData.preparation_method
+          }],
+          dosage: formData.dosage,
+          drug_interactions: moderationResponse.drug_interactions || [],
+          contraindications: moderationResponse.contraindications || [],
+          side_effects: moderationResponse.side_effects || [],
+          major_compounds: moderationResponse.major_compounds || [],
+          research_references: [],
+          safety_rating: moderationResponse.safety_rating || "Use with Caution",
+          featured: false,
+          submitted_by: formData.submitter_name || "Anonymous",
+          community_contributed: true
+        };
+
+        await createHerbMutation.mutateAsync(herbData);
+      }
+
       setSubmissionComplete(true);
 
     } catch (error) {
@@ -112,26 +198,31 @@ Provide thorough, evidence-based analysis focused on user safety.`,
             </div>
             
             <h2 className="text-3xl font-bold text-[#2D5016] mb-4">
-              Thank You for Your Submission!
+              {moderationResult?.moderation_status === "Approved" ? "Published Successfully!" : "Thank You for Your Submission!"}
             </h2>
             
             <div className="mb-6">
               {moderationResult?.moderation_status === "Approved" && (
-                <Badge className="bg-green-500 text-white text-lg px-4 py-2">
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Approved for Publication
-                </Badge>
-              )}
-              {moderationResult?.moderation_status === "Pending Review" && (
-                <Badge className="bg-blue-500 text-white text-lg px-4 py-2">
-                  <Info className="w-5 h-5 mr-2" />
-                  Pending Expert Review
-                </Badge>
+                <>
+                  <Badge className="bg-green-500 text-white text-lg px-4 py-2 mb-4">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Approved & Published
+                  </Badge>
+                  <p className="text-gray-700 mb-4">
+                    Your remedy has been validated and is now live on the Explore Herbs page!
+                  </p>
+                </>
               )}
               {moderationResult?.moderation_status === "Flagged - Risk Identified" && (
                 <Badge className="bg-yellow-500 text-white text-lg px-4 py-2">
                   <AlertTriangle className="w-5 h-5 mr-2" />
-                  Flagged for Review
+                  Safety Concerns Identified
+                </Badge>
+              )}
+              {moderationResult?.moderation_status === "Rejected" && (
+                <Badge className="bg-red-500 text-white text-lg px-4 py-2">
+                  <AlertTriangle className="w-5 h-5 mr-2" />
+                  Not Approved
                 </Badge>
               )}
             </div>
@@ -158,7 +249,11 @@ Provide thorough, evidence-based analysis focused on user safety.`,
               <Button onClick={() => {
                 setSubmissionComplete(false);
                 setModerationResult(null);
+                setUploadedImage(null);
                 setFormData({
+                  common_name: "",
+                  botanical_name: "",
+                  local_names: "",
                   herbs_used: "",
                   health_condition: "",
                   preparation_method: "",
@@ -171,9 +266,11 @@ Provide thorough, evidence-based analysis focused on user safety.`,
               }}>
                 Submit Another Remedy
               </Button>
-              <Button variant="outline" onClick={() => window.location.href = "/"}>
-                Back to Home
-              </Button>
+              {moderationResult?.moderation_status === "Approved" && (
+                <Button variant="outline" onClick={() => window.location.href = "/explore-herbs"}>
+                  View on Explore Page
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -190,7 +287,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
             Submit a Herbal Remedy
           </h1>
           <p className="text-lg text-gray-600">
-            Share your traditional herbal knowledge with our community. All submissions are reviewed by AI for safety and credibility.
+            Share your traditional herbal knowledge. AI instantly validates and publishes approved remedies.
           </p>
         </div>
 
@@ -198,7 +295,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
         <Alert className="mb-8 bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-900">
-            <strong>No sign-up required!</strong> Your submission will be automatically validated by our AI safety system and reviewed by experts. Personal information is optional.
+            <strong>Instant Publishing!</strong> Our AI reviews submissions in real-time. Approved remedies appear immediately on the Explore Herbs page.
           </AlertDescription>
         </Alert>
 
@@ -209,17 +306,74 @@ Provide thorough, evidence-based analysis focused on user safety.`,
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Image Upload */}
               <div>
-                <Label htmlFor="herbs">Herbs Used *</Label>
+                <Label>Herb Image (Optional)</Label>
+                <div className="mt-2">
+                  {uploadedImage ? (
+                    <div className="relative">
+                      <img src={uploadedImage} alt="Uploaded herb" className="w-full h-48 object-cover rounded-lg" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => setUploadedImage(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="max-w-xs mx-auto"
+                      />
+                      {uploadingImage && <p className="text-sm text-gray-500 mt-2">Uploading...</p>}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="common_name">Common Name *</Label>
+                  <Input
+                    id="common_name"
+                    required
+                    value={formData.common_name}
+                    onChange={(e) => setFormData({...formData, common_name: e.target.value})}
+                    placeholder="e.g., African Ginger"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="botanical_name">Botanical Name *</Label>
+                  <Input
+                    id="botanical_name"
+                    required
+                    value={formData.botanical_name}
+                    onChange={(e) => setFormData({...formData, botanical_name: e.target.value})}
+                    placeholder="e.g., Siphonochilus aethiopicus"
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="local_names">Local Names (Optional)</Label>
                 <Input
-                  id="herbs"
-                  required
-                  value={formData.herbs_used}
-                  onChange={(e) => setFormData({...formData, herbs_used: e.target.value})}
-                  placeholder="e.g., Chamomile, Lavender, Peppermint (separate with commas)"
+                  id="local_names"
+                  value={formData.local_names}
+                  onChange={(e) => setFormData({...formData, local_names: e.target.value})}
+                  placeholder="Separate with commas: Isiphephetho, Indungulo"
                   className="mt-2"
                 />
-                <p className="text-sm text-gray-500 mt-1">List all herbs used, separated by commas</p>
               </div>
 
               <div>
@@ -229,7 +383,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
                   required
                   value={formData.health_condition}
                   onChange={(e) => setFormData({...formData, health_condition: e.target.value})}
-                  placeholder="e.g., Insomnia, Anxiety, Digestive issues"
+                  placeholder="e.g., Respiratory infections, Digestive issues"
                   className="mt-2"
                 />
               </div>
@@ -241,7 +395,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
                   required
                   value={formData.preparation_method}
                   onChange={(e) => setFormData({...formData, preparation_method: e.target.value})}
-                  placeholder="Describe how the herbs were prepared (e.g., tea, tincture, poultice, etc.)"
+                  placeholder="Describe how the herb is prepared (e.g., boil roots in water, make into tea, etc.)"
                   rows={4}
                   className="mt-2"
                 />
@@ -255,7 +409,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
                     required
                     value={formData.dosage}
                     onChange={(e) => setFormData({...formData, dosage: e.target.value})}
-                    placeholder="e.g., 1 cup 3 times daily"
+                    placeholder="e.g., 1 cup 2-3 times daily"
                     className="mt-2"
                   />
                 </div>
@@ -267,20 +421,20 @@ Provide thorough, evidence-based analysis focused on user safety.`,
                     required
                     value={formData.duration_of_use}
                     onChange={(e) => setFormData({...formData, duration_of_use: e.target.value})}
-                    placeholder="e.g., 2 weeks, 1 month"
+                    placeholder="e.g., 1-2 weeks"
                     className="mt-2"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="effects">Observed Effects *</Label>
+                <Label htmlFor="effects">Observed Effects & Traditional Uses *</Label>
                 <Textarea
                   id="effects"
                   required
                   value={formData.observed_effects}
                   onChange={(e) => setFormData({...formData, observed_effects: e.target.value})}
-                  placeholder="Describe the effects you experienced, both positive and negative"
+                  placeholder="Describe the effects and traditional knowledge about this herb"
                   rows={5}
                   className="mt-2"
                 />
@@ -288,20 +442,17 @@ Provide thorough, evidence-based analysis focused on user safety.`,
 
               <div className="border-t pt-6">
                 <h3 className="font-semibold text-lg text-[#2D5016] mb-4">
-                  Optional Contact Information
+                  Your Information (Optional)
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Providing your contact information allows our experts to reach out for additional details if needed.
-                </p>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="name">Your Name (Optional)</Label>
+                    <Label htmlFor="name">Your Name</Label>
                     <Input
                       id="name"
                       value={formData.submitter_name}
                       onChange={(e) => setFormData({...formData, submitter_name: e.target.value})}
-                      placeholder="Full name"
+                      placeholder="Your name (will be shown as contributor)"
                       className="mt-2"
                     />
                   </div>
@@ -313,7 +464,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
                       type="email"
                       value={formData.submitter_contact}
                       onChange={(e) => setFormData({...formData, submitter_contact: e.target.value})}
-                      placeholder="Email address"
+                      placeholder="Email for follow-up"
                       className="mt-2"
                     />
                   </div>
@@ -322,7 +473,7 @@ Provide thorough, evidence-based analysis focused on user safety.`,
 
               <Alert>
                 <AlertDescription>
-                  By submitting, you acknowledge that your remedy will be reviewed for scientific credibility and safety. We may contact you for additional information.
+                  Your submission will be instantly reviewed by AI. Approved remedies are published immediately to help the community.
                 </AlertDescription>
               </Alert>
 
@@ -334,12 +485,12 @@ Provide thorough, evidence-based analysis focused on user safety.`,
                 {aiModerating ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    AI is validating your submission...
+                    AI is validating and publishing...
                   </>
                 ) : (
                   <>
                     <Send className="w-5 h-5 mr-2" />
-                    Submit Remedy for Review
+                    Submit & Publish Remedy
                   </>
                 )}
               </Button>
