@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
-  Leaf, MapPin, AlertTriangle, Flask, BookOpen, 
+  Leaf, MapPin, AlertTriangle, Beaker, BookOpen, 
   Heart, Shield, Pill, Sparkles, ArrowLeft 
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -326,7 +326,7 @@ export default function HerbProfile() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[#2D5016]">
-                  <Flask className="w-5 h-5" />
+                  <Beaker className="w-5 h-5" />
                   Major Chemical Compounds
                 </CardTitle>
               </CardHeader>
