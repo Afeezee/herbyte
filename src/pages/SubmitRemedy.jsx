@@ -10,6 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from 'react-router-dom'; // Added Link import
+
+// Helper function to create page URLs - assuming a simple mapping for now
+const createPageUrl = (pageName) => {
+  switch (pageName) {
+    case "ExploreHerbs":
+      return "/explore-herbs";
+    // Add other page mappings if needed
+    default:
+      return "/";
+  }
+};
 
 export default function SubmitRemedy() {
   const queryClient = useQueryClient();
@@ -144,16 +156,16 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 type: "object",
                 properties: {
                   benefit: { type: "string" },
-                  evidence_level: { 
+                  evidence_level: {
                     type: "string",
                     enum: ["Strong Clinical Evidence", "Moderate Evidence", "Preliminary Research", "Traditional Use", "Anecdotal"]
                   }
                 }
               }
             },
-            conditions_treated: { 
-              type: "array", 
-              items: { type: "string" } 
+            conditions_treated: {
+              type: "array",
+              items: { type: "string" }
             },
             preparation_methods: {
               type: "array",
@@ -166,21 +178,21 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
               }
             },
             dosage_guidance: { type: "string" },
-            major_compounds: { 
-              type: "array", 
-              items: { type: "string" } 
+            major_compounds: {
+              type: "array",
+              items: { type: "string" }
             },
-            drug_interactions: { 
-              type: "array", 
-              items: { type: "string" } 
+            drug_interactions: {
+              type: "array",
+              items: { type: "string" }
             },
-            contraindications: { 
-              type: "array", 
-              items: { type: "string" } 
+            contraindications: {
+              type: "array",
+              items: { type: "string" }
             },
-            side_effects: { 
-              type: "array", 
-              items: { type: "string" } 
+            side_effects: {
+              type: "array",
+              items: { type: "string" }
             },
             research_references: {
               type: "array",
@@ -193,17 +205,17 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 }
               }
             },
-            safety_concerns: { 
-              type: "array", 
-              items: { type: "string" } 
+            safety_concerns: {
+              type: "array",
+              items: { type: "string" }
             },
-            potential_interactions: { 
-              type: "array", 
-              items: { type: "string" } 
+            potential_interactions: {
+              type: "array",
+              items: { type: "string" }
             },
-            alternative_herbs: { 
-              type: "array", 
-              items: { type: "string" } 
+            alternative_herbs: {
+              type: "array",
+              items: { type: "string" }
             },
             expert_review_required: { type: "boolean" }
           }
@@ -214,7 +226,6 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
 
       // Save to RemedySubmission for records
       const submissionData = {
-        // Use common_name if herbs_used isn't provided (as it's optional in the form)
         herbs_used: formData.herbs_used ? formData.herbs_used.split(',').map(h => h.trim()) : [formData.common_name],
         health_condition: formData.health_condition,
         preparation_method: formData.preparation_method,
@@ -225,7 +236,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
         submitter_contact: formData.submitter_contact,
         moderation_status: moderationResponse.moderation_status,
         risk_level: moderationResponse.risk_level,
-        expert_review_required: moderationResponse.expert_review_required || false, // Use new field
+        expert_review_required: moderationResponse.expert_review_required || false,
         ai_feedback: JSON.stringify(moderationResponse)
       };
 
@@ -239,21 +250,21 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
           local_names: formData.local_names ? formData.local_names.split(',').map(n => n.trim()) : [],
           description: formData.observed_effects,
           image_url: uploadedImage || "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&h=400&fit=crop",
-          region: moderationResponse.region || "Global", // Use AI-generated region
-          category: moderationResponse.category || "Other", // Use AI-generated category
-          health_benefits: moderationResponse.health_benefits || [], // Use AI-generated benefits
-          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition], // Use AI-generated conditions
-          preparation_methods: moderationResponse.preparation_methods || [{ // Use AI-generated methods
+          region: moderationResponse.region || "Global",
+          category: moderationResponse.category || "Other",
+          health_benefits: moderationResponse.health_benefits || [],
+          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition],
+          preparation_methods: moderationResponse.preparation_methods || [{
             method: "Traditional Method",
             instructions: formData.preparation_method
           }],
-          dosage: moderationResponse.dosage_guidance || formData.dosage, // Use AI-generated dosage
-          drug_interactions: moderationResponse.drug_interactions || [], // Use AI-generated interactions
-          contraindications: moderationResponse.contraindications || [], // Use AI-generated contraindications
-          side_effects: moderationResponse.side_effects || [], // Use AI-generated side effects
-          major_compounds: moderationResponse.major_compounds || [], // Use AI-generated compounds
-          research_references: moderationResponse.research_references || [], // Use AI-generated references
-          safety_rating: moderationResponse.safety_rating || "Use with Caution", // Use AI-generated safety rating
+          dosage: moderationResponse.dosage_guidance || formData.dosage,
+          drug_interactions: moderationResponse.drug_interactions || [],
+          contraindications: moderationResponse.contraindications || [],
+          side_effects: moderationResponse.side_effects || [],
+          major_compounds: moderationResponse.major_compounds || [],
+          research_references: moderationResponse.research_references || [],
+          safety_rating: moderationResponse.safety_rating || "Use with Caution",
           featured: false,
           submitted_by: formData.submitter_name || "Anonymous",
           community_contributed: true
@@ -280,11 +291,11 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            
+
             <h2 className="text-3xl font-bold text-[#2D5016] mb-4">
               {moderationResult?.moderation_status === "Approved" ? "Published Successfully!" : "Thank You for Your Submission!"}
             </h2>
-            
+
             <div className="mb-6">
               {moderationResult?.moderation_status === "Approved" && (
                 <>
@@ -351,9 +362,11 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 Submit Another Remedy
               </Button>
               {moderationResult?.moderation_status === "Approved" && (
-                <Button variant="outline" onClick={() => window.location.href = "/explore-herbs"}>
-                  View on Explore Page
-                </Button>
+                <Link to={createPageUrl("ExploreHerbs")}>
+                  <Button variant="outline">
+                    View on Explore Page
+                  </Button>
+                </Link>
               )}
             </div>
           </CardContent>
@@ -561,8 +574,8 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 </AlertDescription>
               </Alert>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={aiModerating}
                 className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6"
               >
