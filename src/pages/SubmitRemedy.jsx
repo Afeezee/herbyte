@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { createPageUrl } from "@/utils";
 
 export default function SubmitRemedy() {
   const queryClient = useQueryClient();
@@ -17,7 +17,7 @@ export default function SubmitRemedy() {
     common_name: "",
     botanical_name: "",
     local_names: "",
-    herbs_used: "",
+    herbs_used: "", // This field isn't used in the prompt directly, but kept for future potential use or other parts of the system.
     health_condition: "",
     preparation_method: "",
     dosage: "",
@@ -214,6 +214,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
 
       // Save to RemedySubmission for records
       const submissionData = {
+        // Use common_name if herbs_used isn't provided (as it's optional in the form)
         herbs_used: formData.herbs_used ? formData.herbs_used.split(',').map(h => h.trim()) : [formData.common_name],
         health_condition: formData.health_condition,
         preparation_method: formData.preparation_method,
@@ -224,7 +225,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
         submitter_contact: formData.submitter_contact,
         moderation_status: moderationResponse.moderation_status,
         risk_level: moderationResponse.risk_level,
-        expert_review_required: moderationResponse.expert_review_required || false,
+        expert_review_required: moderationResponse.expert_review_required || false, // Use new field
         ai_feedback: JSON.stringify(moderationResponse)
       };
 
@@ -238,21 +239,21 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
           local_names: formData.local_names ? formData.local_names.split(',').map(n => n.trim()) : [],
           description: formData.observed_effects,
           image_url: uploadedImage || "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&h=400&fit=crop",
-          region: moderationResponse.region || "Global",
-          category: moderationResponse.category || "Other",
-          health_benefits: moderationResponse.health_benefits || [],
-          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition],
-          preparation_methods: moderationResponse.preparation_methods || [{
+          region: moderationResponse.region || "Global", // Use AI-generated region
+          category: moderationResponse.category || "Other", // Use AI-generated category
+          health_benefits: moderationResponse.health_benefits || [], // Use AI-generated benefits
+          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition], // Use AI-generated conditions
+          preparation_methods: moderationResponse.preparation_methods || [{ // Use AI-generated methods
             method: "Traditional Method",
             instructions: formData.preparation_method
           }],
-          dosage: moderationResponse.dosage_guidance || formData.dosage,
-          drug_interactions: moderationResponse.drug_interactions || [],
-          contraindications: moderationResponse.contraindications || [],
-          side_effects: moderationResponse.side_effects || [],
-          major_compounds: moderationResponse.major_compounds || [],
-          research_references: moderationResponse.research_references || [],
-          safety_rating: moderationResponse.safety_rating || "Use with Caution",
+          dosage: moderationResponse.dosage_guidance || formData.dosage, // Use AI-generated dosage
+          drug_interactions: moderationResponse.drug_interactions || [], // Use AI-generated interactions
+          contraindications: moderationResponse.contraindications || [], // Use AI-generated contraindications
+          side_effects: moderationResponse.side_effects || [], // Use AI-generated side effects
+          major_compounds: moderationResponse.major_compounds || [], // Use AI-generated compounds
+          research_references: moderationResponse.research_references || [], // Use AI-generated references
+          safety_rating: moderationResponse.safety_rating || "Use with Caution", // Use AI-generated safety rating
           featured: false,
           submitted_by: formData.submitter_name || "Anonymous",
           community_contributed: true
@@ -350,7 +351,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 Submit Another Remedy
               </Button>
               {moderationResult?.moderation_status === "Approved" && (
-                <Button variant="outline" onClick={() => window.location.href = createPageUrl("ExploreHerbs")}>
+                <Button variant="outline" onClick={() => window.location.href = "/explore-herbs"}>
                   View on Explore Page
                 </Button>
               )}
@@ -364,6 +365,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-6">
+        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-[#2D5016] mb-4">
             Submit a Herbal Remedy
@@ -373,6 +375,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
           </p>
         </div>
 
+        {/* Info Alert */}
         <Alert className="mb-8 bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-900">
@@ -380,169 +383,198 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
           </AlertDescription>
         </Alert>
 
+        {/* Form */}
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-[#2D5016]">Remedy Details</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="common_name">Common Name *</Label>
-                <Input
-                  id="common_name"
-                  required
-                  value={formData.common_name}
-                  onChange={(e) => setFormData({...formData, common_name: e.target.value})}
-                  placeholder="e.g., Ginger, Turmeric"
-                />
+              {/* Image Upload */}
+              <div>
+                <Label>Herb Image (Optional)</Label>
+                <div className="mt-2">
+                  {uploadedImage ? (
+                    <div className="relative">
+                      <img src={uploadedImage} alt="Uploaded herb" className="w-full h-48 object-cover rounded-lg" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => setUploadedImage(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="max-w-xs mx-auto"
+                      />
+                      {uploadingImage && <p className="text-sm text-gray-500 mt-2">Uploading...</p>}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="botanical_name">Botanical/Scientific Name</Label>
-                <Input
-                  id="botanical_name"
-                  value={formData.botanical_name}
-                  onChange={(e) => setFormData({...formData, botanical_name: e.target.value})}
-                  placeholder="e.g., Zingiber officinale"
-                />
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="common_name">Common Name *</Label>
+                  <Input
+                    id="common_name"
+                    required
+                    value={formData.common_name}
+                    onChange={(e) => setFormData({...formData, common_name: e.target.value})}
+                    placeholder="e.g., African Ginger"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="botanical_name">Botanical Name *</Label>
+                  <Input
+                    id="botanical_name"
+                    required
+                    value={formData.botanical_name}
+                    onChange={(e) => setFormData({...formData, botanical_name: e.target.value})}
+                    placeholder="e.g., Siphonochilus aethiopicus"
+                    className="mt-2"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="local_names">Local/Traditional Names (comma-separated)</Label>
+              <div>
+                <Label htmlFor="local_names">Local Names (Optional)</Label>
                 <Input
                   id="local_names"
                   value={formData.local_names}
                   onChange={(e) => setFormData({...formData, local_names: e.target.value})}
-                  placeholder="e.g., Isingibibi, Tangawizi"
+                  placeholder="Separate with commas: Isiphephetho, Indungulo"
+                  className="mt-2"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Herb Image (Optional)</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                  />
-                  {uploadingImage && <Loader2 className="w-5 h-5 animate-spin text-[#2D5016]" />}
-                </div>
-                {uploadedImage && (
-                  <div className="relative w-32 h-32">
-                    <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                    <button
-                      type="button"
-                      onClick={() => setUploadedImage(null)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="health_condition">Health Condition Treated *</Label>
+              <div>
+                <Label htmlFor="condition">Health Condition Addressed *</Label>
                 <Input
-                  id="health_condition"
+                  id="condition"
                   required
                   value={formData.health_condition}
                   onChange={(e) => setFormData({...formData, health_condition: e.target.value})}
-                  placeholder="e.g., Common cold, inflammation"
+                  placeholder="e.g., Respiratory infections, Digestive issues"
+                  className="mt-2"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="preparation_method">Preparation Method *</Label>
+              <div>
+                <Label htmlFor="preparation">Preparation Method *</Label>
                 <Textarea
-                  id="preparation_method"
+                  id="preparation"
                   required
                   value={formData.preparation_method}
                   onChange={(e) => setFormData({...formData, preparation_method: e.target.value})}
-                  placeholder="Describe how to prepare this remedy..."
+                  placeholder="Describe how the herb is prepared (e.g., boil roots in water, make into tea, etc.)"
                   rows={4}
+                  className="mt-2"
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="dosage">Recommended Dosage *</Label>
+                <div>
+                  <Label htmlFor="dosage">Dosage *</Label>
                   <Input
                     id="dosage"
                     required
                     value={formData.dosage}
                     onChange={(e) => setFormData({...formData, dosage: e.target.value})}
-                    placeholder="e.g., 1 teaspoon twice daily"
+                    placeholder="e.g., 1 cup 2-3 times daily"
+                    className="mt-2"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="duration_of_use">Duration of Use</Label>
+                <div>
+                  <Label htmlFor="duration">Duration of Use *</Label>
                   <Input
-                    id="duration_of_use"
+                    id="duration"
+                    required
                     value={formData.duration_of_use}
                     onChange={(e) => setFormData({...formData, duration_of_use: e.target.value})}
-                    placeholder="e.g., 7-10 days"
+                    placeholder="e.g., 1-2 weeks"
+                    className="mt-2"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="observed_effects">Observed Effects/Benefits *</Label>
+              <div>
+                <Label htmlFor="effects">Observed Effects & Traditional Uses *</Label>
                 <Textarea
-                  id="observed_effects"
+                  id="effects"
                   required
                   value={formData.observed_effects}
                   onChange={(e) => setFormData({...formData, observed_effects: e.target.value})}
-                  placeholder="Describe the effects you or others have observed..."
-                  rows={4}
+                  placeholder="Describe the effects and traditional knowledge about this herb"
+                  rows={5}
+                  className="mt-2"
                 />
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="font-semibold text-[#2D5016] mb-4">Your Information</h3>
-                
+                <h3 className="font-semibold text-lg text-[#2D5016] mb-4">
+                  Your Information (Optional)
+                </h3>
+
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="submitter_name">Your Name (Optional)</Label>
+                  <div>
+                    <Label htmlFor="name">Your Name</Label>
                     <Input
-                      id="submitter_name"
+                      id="name"
                       value={formData.submitter_name}
                       onChange={(e) => setFormData({...formData, submitter_name: e.target.value})}
-                      placeholder="Anonymous"
+                      placeholder="Your name (will be shown as contributor)"
+                      className="mt-2"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="submitter_contact">Contact (Optional)</Label>
+                  <div>
+                    <Label htmlFor="contact">Contact (Optional)</Label>
                     <Input
-                      id="submitter_contact"
+                      id="contact"
                       type="email"
                       value={formData.submitter_contact}
                       onChange={(e) => setFormData({...formData, submitter_contact: e.target.value})}
-                      placeholder="your@email.com"
+                      placeholder="Email for follow-up"
+                      className="mt-2"
                     />
                   </div>
                 </div>
               </div>
 
-              <Button
-                type="submit"
+              <Alert>
+                <AlertDescription>
+                  Your submission will be instantly reviewed by AI. Approved remedies are published immediately to help the community.
+                </AlertDescription>
+              </Alert>
+
+              <Button 
+                type="submit" 
                 disabled={aiModerating}
-                className="w-full bg-[#2D5016] hover:bg-[#4A7C2E] text-white"
-                size="lg"
+                className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6"
               >
                 {aiModerating ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    AI Validating & Researching...
+                    AI is validating and publishing...
                   </>
                 ) : (
                   <>
                     <Send className="w-5 h-5 mr-2" />
-                    Submit for AI Validation
+                    Submit & Publish Remedy
                   </>
                 )}
               </Button>
