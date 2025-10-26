@@ -47,7 +47,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link to={createPageUrl("SubmitRemedy")}>
-                  <Button size="lg" variant="outline" className="bg-background text-green-950 px-8 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-10 border-white hover:bg-white/10 w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="bg-background text-[#2D5016] px-8 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-10 border-white hover:bg-white/10 w-full sm:w-auto">
                     Share Your Remedy
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
