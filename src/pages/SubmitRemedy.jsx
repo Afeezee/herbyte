@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,7 +17,7 @@ export default function SubmitRemedy() {
     common_name: "",
     botanical_name: "",
     local_names: "",
-    herbs_used: "",
+    herbs_used: "", // This field isn't used in the prompt directly, but kept for future potential use or other parts of the system.
     health_condition: "",
     preparation_method: "",
     dosage: "",
@@ -66,9 +67,9 @@ export default function SubmitRemedy() {
     setAiModerating(true);
 
     try {
-      // AI Moderation
+      // Enhanced AI Moderation with Web Search and Comprehensive Analysis
       const moderationResponse = await base44.integrations.Core.InvokeLLM({
-        prompt: `As an expert herbalist and medical safety validator, analyze this herbal remedy submission for scientific credibility and safety:
+        prompt: `As an expert herbalist, pharmacologist, and medical safety validator with access to current scientific databases, perform a comprehensive analysis of this herbal remedy submission:
 
 Common Name: ${formData.common_name}
 Botanical Name: ${formData.botanical_name}
@@ -79,15 +80,39 @@ Dosage: ${formData.dosage}
 Duration of Use: ${formData.duration_of_use}
 Observed Effects: ${formData.observed_effects}
 
-Evaluate:
-1. Scientific credibility - does this seem plausible based on known herbal properties?
-2. Safety concerns - are there any red flags, contraindications, or dangerous interactions?
-3. Misleading claims - are the claimed effects realistic or exaggerated?
-4. Risk level - classify as Low, Moderate, High, or Critical
-5. Recommendation for approval status
-6. Generate comprehensive herb information including benefits, compounds, safety warnings
+TASK 1 - SAFETY VALIDATION:
+Evaluate scientific credibility and safety. Classify the submission as:
+- "Approved" if scientifically plausible and safe
+- "Flagged - Risk Identified" if concerns exist but may be safe with precautions
+- "Rejected" if dangerous or misleading
 
-Provide thorough, evidence-based analysis focused on user safety. If approved, provide complete herb profile data.`,
+TASK 2 - COMPREHENSIVE RESEARCH (Use internet context to gather accurate information):
+If approved or flagged, compile detailed herbal information including:
+
+1. HEALTH BENEFITS: List 3-5 specific health benefits with evidence levels (Strong Clinical Evidence, Moderate Evidence, Preliminary Research, Traditional Use, Anecdotal)
+
+2. CONDITIONS TREATED: List all health conditions this herb can address
+
+3. PREPARATION METHODS: Provide 2-4 traditional and modern preparation methods with detailed instructions
+
+4. DOSAGE GUIDANCE: Provide evidence-based recommended dosages
+
+5. MAJOR CHEMICAL COMPOUNDS: List the key active compounds (e.g., alkaloids, flavonoids, terpenes)
+
+6. DRUG INTERACTIONS: List all known drug interactions and medications that may interact
+
+7. CONTRAINDICATIONS: List situations/conditions when this herb should NOT be used (pregnancy, diseases, etc.)
+
+8. SIDE EFFECTS: List potential adverse effects
+
+9. RESEARCH REFERENCES: Provide 2-4 real, verifiable scientific references with titles, URLs, and sources (PubMed, journals, etc.)
+
+10. REGION: Identify primary geographic region (Africa, Asia, Europe, North America, South America, Australia, Middle East, Global)
+
+11. CATEGORY: Classify herb (Adaptogen, Anti-inflammatory, Digestive, Immune Support, Cardiovascular, Respiratory, Nervous System, Antimicrobial, Pain Relief, Skin Health, Other)
+
+Be thorough, evidence-based, and prioritize user safety. Use actual research when possible.`,
+        add_context_from_internet: true,
         response_json_schema: {
           type: "object",
           properties: {
@@ -104,25 +129,83 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
               enum: ["Generally Safe", "Use with Caution", "High Risk - Expert Guidance Required"]
             },
             credibility_assessment: { type: "string" },
-            safety_concerns: { type: "array", items: { type: "string" } },
-            potential_interactions: { type: "array", items: { type: "string" } },
             feedback_summary: { type: "string" },
+            region: {
+              type: "string",
+              enum: ["Africa", "Asia", "Europe", "North America", "South America", "Australia", "Middle East", "Global"]
+            },
+            category: {
+              type: "string",
+              enum: ["Adaptogen", "Anti-inflammatory", "Digestive", "Immune Support", "Cardiovascular", "Respiratory", "Nervous System", "Antimicrobial", "Pain Relief", "Skin Health", "Other"]
+            },
             health_benefits: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
                   benefit: { type: "string" },
-                  evidence_level: { type: "string" }
+                  evidence_level: { 
+                    type: "string",
+                    enum: ["Strong Clinical Evidence", "Moderate Evidence", "Preliminary Research", "Traditional Use", "Anecdotal"]
+                  }
                 }
               }
             },
-            conditions_treated: { type: "array", items: { type: "string" } },
-            contraindications: { type: "array", items: { type: "string" } },
-            side_effects: { type: "array", items: { type: "string" } },
-            drug_interactions: { type: "array", items: { type: "string" } },
-            major_compounds: { type: "array", items: { type: "string" } },
-            category: { type: "string" }
+            conditions_treated: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            preparation_methods: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  method: { type: "string" },
+                  instructions: { type: "string" }
+                }
+              }
+            },
+            dosage_guidance: { type: "string" },
+            major_compounds: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            drug_interactions: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            contraindications: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            side_effects: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            research_references: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  url: { type: "string" },
+                  source: { type: "string" }
+                }
+              }
+            },
+            safety_concerns: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            potential_interactions: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            alternative_herbs: { 
+              type: "array", 
+              items: { type: "string" } 
+            },
+            expert_review_required: { type: "boolean" }
           }
         }
       });
@@ -131,7 +214,8 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
 
       // Save to RemedySubmission for records
       const submissionData = {
-        herbs_used: formData.herbs_used.split(',').map(h => h.trim()),
+        // Use common_name if herbs_used isn't provided (as it's optional in the form)
+        herbs_used: formData.herbs_used ? formData.herbs_used.split(',').map(h => h.trim()) : [formData.common_name],
         health_condition: formData.health_condition,
         preparation_method: formData.preparation_method,
         dosage: formData.dosage,
@@ -141,13 +225,13 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
         submitter_contact: formData.submitter_contact,
         moderation_status: moderationResponse.moderation_status,
         risk_level: moderationResponse.risk_level,
-        expert_review_required: false,
+        expert_review_required: moderationResponse.expert_review_required || false, // Use new field
         ai_feedback: JSON.stringify(moderationResponse)
       };
 
       await createRemedyMutation.mutateAsync(submissionData);
 
-      // If approved, automatically create Herb entity
+      // If approved, automatically create comprehensive Herb entity
       if (moderationResponse.moderation_status === "Approved") {
         const herbData = {
           common_name: formData.common_name,
@@ -155,21 +239,21 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
           local_names: formData.local_names ? formData.local_names.split(',').map(n => n.trim()) : [],
           description: formData.observed_effects,
           image_url: uploadedImage || "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&h=400&fit=crop",
-          region: "Africa", // Default, can be enhanced
-          category: moderationResponse.category || "Other",
-          health_benefits: moderationResponse.health_benefits || [],
-          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition],
-          preparation_methods: [{
+          region: moderationResponse.region || "Global", // Use AI-generated region
+          category: moderationResponse.category || "Other", // Use AI-generated category
+          health_benefits: moderationResponse.health_benefits || [], // Use AI-generated benefits
+          conditions_treated: moderationResponse.conditions_treated || [formData.health_condition], // Use AI-generated conditions
+          preparation_methods: moderationResponse.preparation_methods || [{ // Use AI-generated methods
             method: "Traditional Method",
             instructions: formData.preparation_method
           }],
-          dosage: formData.dosage,
-          drug_interactions: moderationResponse.drug_interactions || [],
-          contraindications: moderationResponse.contraindications || [],
-          side_effects: moderationResponse.side_effects || [],
-          major_compounds: moderationResponse.major_compounds || [],
-          research_references: [],
-          safety_rating: moderationResponse.safety_rating || "Use with Caution",
+          dosage: moderationResponse.dosage_guidance || formData.dosage, // Use AI-generated dosage
+          drug_interactions: moderationResponse.drug_interactions || [], // Use AI-generated interactions
+          contraindications: moderationResponse.contraindications || [], // Use AI-generated contraindications
+          side_effects: moderationResponse.side_effects || [], // Use AI-generated side effects
+          major_compounds: moderationResponse.major_compounds || [], // Use AI-generated compounds
+          research_references: moderationResponse.research_references || [], // Use AI-generated references
+          safety_rating: moderationResponse.safety_rating || "Use with Caution", // Use AI-generated safety rating
           featured: false,
           submitted_by: formData.submitter_name || "Anonymous",
           community_contributed: true
@@ -209,7 +293,7 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
                     Approved & Published
                   </Badge>
                   <p className="text-gray-700 mb-4">
-                    Your remedy has been validated and is now live on the Explore Herbs page!
+                    Your remedy has been validated with comprehensive research data and is now live on the Explore Herbs page!
                   </p>
                 </>
               )}
@@ -287,7 +371,7 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
             Submit a Herbal Remedy
           </h1>
           <p className="text-lg text-gray-600">
-            Share your traditional herbal knowledge. AI instantly validates and publishes approved remedies.
+            Share your traditional herbal knowledge. AI instantly validates, researches, and publishes approved remedies with comprehensive details.
           </p>
         </div>
 
@@ -295,7 +379,7 @@ Provide thorough, evidence-based analysis focused on user safety. If approved, p
         <Alert className="mb-8 bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-900">
-            <strong>Instant Publishing!</strong> Our AI reviews submissions in real-time. Approved remedies appear immediately on the Explore Herbs page.
+            <strong>Enhanced AI Publishing!</strong> Our AI searches scientific databases to add research references, chemical compounds, safety information, and evidence-based details before publishing.
           </AlertDescription>
         </Alert>
 
