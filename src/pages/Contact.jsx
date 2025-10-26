@@ -69,7 +69,7 @@ ${formData.message}
                   <Mail className="w-7 h-7 text-[#2D5016]" />
                 </div>
                 <h3 className="font-semibold text-lg text-[#2D5016] mb-2">Email Us</h3>
-                <p className="text-gray-600">hello@herbyte.com</p>
+                <p className="text-gray-600">info@cereustechnologies.com</p>
                 <p className="text-sm text-gray-500 mt-2">We respond within 24 hours</p>
               </CardContent>
             </Card>
@@ -104,8 +104,8 @@ ${formData.message}
                 <CardTitle className="text-2xl text-[#2D5016]">Send Us a Message</CardTitle>
               </CardHeader>
               <CardContent>
-                {sent ? (
-                  <div className="text-center py-12">
+                {sent ?
+                <div className="text-center py-12">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                       <CheckCircle className="w-10 h-10 text-green-600" />
                     </div>
@@ -116,78 +116,78 @@ ${formData.message}
                     <Button onClick={() => setSent(false)} variant="outline">
                       Send Another Message
                     </Button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  </div> :
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                       <Label htmlFor="name">Your Name *</Label>
                       <Input
-                        id="name"
-                        required
-                        value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        placeholder="John Doe"
-                        className="mt-2"
-                      />
+                      id="name"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="John Doe"
+                      className="mt-2" />
+
                     </div>
 
                     <div>
                       <Label htmlFor="email">Email Address *</Label>
                       <Input
-                        id="email"
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        placeholder="john@example.com"
-                        className="mt-2"
-                      />
+                      id="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="john@example.com"
+                      className="mt-2" />
+
                     </div>
 
                     <div>
                       <Label htmlFor="subject">Subject *</Label>
                       <Input
-                        id="subject"
-                        required
-                        value={formData.subject}
-                        onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                        placeholder="How can we help?"
-                        className="mt-2"
-                      />
+                      id="subject"
+                      required
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      placeholder="How can we help?"
+                      className="mt-2" />
+
                     </div>
 
                     <div>
                       <Label htmlFor="message">Message *</Label>
                       <Textarea
-                        id="message"
-                        required
-                        value={formData.message}
-                        onChange={(e) => setFormData({...formData, message: e.target.value})}
-                        placeholder="Tell us more about your inquiry..."
-                        rows={6}
-                        className="mt-2"
-                      />
+                      id="message"
+                      required
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      placeholder="Tell us more about your inquiry..."
+                      rows={6}
+                      className="mt-2" />
+
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      disabled={sending}
-                      className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6"
-                    >
-                      {sending ? (
-                        <>
+                    <Button
+                    type="submit"
+                    disabled={sending}
+                    className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6">
+
+                      {sending ?
+                    <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                           Sending...
-                        </>
-                      ) : (
-                        <>
+                        </> :
+
+                    <>
                           <Send className="w-5 h-5 mr-2" />
                           Send Message
                         </>
-                      )}
+                    }
                     </Button>
                   </form>
-                )}
+                }
               </CardContent>
             </Card>
 
@@ -237,6 +237,6 @@ ${formData.message}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
