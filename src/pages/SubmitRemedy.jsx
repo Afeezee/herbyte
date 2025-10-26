@@ -351,7 +351,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 Submit Another Remedy
               </Button>
               {moderationResult?.moderation_status === "Approved" && (
-                <Button variant="outline" onClick={() => window.location.href = "/explore-herbs"}>
+                <Button variant="outline" onClick={() => window.location.href = "/exploreherbs"}>
                   View on Explore Page
                 </Button>
               )}
