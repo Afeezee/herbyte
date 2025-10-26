@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils"; // Updated import for createPageUrl
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,18 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Link } from 'react-router-dom'; // Added Link import
-
-// Helper function to create page URLs - assuming a simple mapping for now
-const createPageUrl = (pageName) => {
-  switch (pageName) {
-    case "ExploreHerbs":
-      return "/explore-herbs";
-    // Add other page mappings if needed
-    default:
-      return "/";
-  }
-};
+import { Link } from 'react-router-dom';
 
 export default function SubmitRemedy() {
   const queryClient = useQueryClient();
