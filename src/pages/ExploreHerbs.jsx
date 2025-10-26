@@ -20,10 +20,20 @@ export default function ExploreHerbs() {
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  const { data: herbs, isLoading } = useQuery({
+  const { data: herbs = [], isLoading, error } = useQuery({
     queryKey: ['herbs'],
-    queryFn: () => base44.entities.Herb.list('-created_date'),
-    initialData: [],
+    queryFn: async () => {
+      try {
+        const result = await base44.entities.Herb.list('-created_date');
+        return result || [];
+      } catch (err) {
+        console.error("Error fetching herbs:", err);
+        return [];
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const filteredHerbs = herbs.filter(herb => {
@@ -64,6 +74,7 @@ export default function ExploreHerbs() {
       setAiSuggestions(result.suggestions || []);
     } catch (error) {
       console.error("AI search error:", error);
+      setAiSuggestions([]);
     }
     setLoadingSuggestions(false);
   };
@@ -79,6 +90,18 @@ export default function ExploreHerbs() {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Herbs</h2>
+          <p className="text-gray-600 mb-4">We encountered an issue loading the herb database.</p>
+          <Button onClick={() => window.location.reload()}>Reload Page</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

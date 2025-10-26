@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -21,13 +22,21 @@ export default function HerbProfile() {
   const [showAIInsight, setShowAIInsight] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
-  const { data: herb, isLoading } = useQuery({
+  const { data: herb, isLoading, error } = useQuery({
     queryKey: ['herb', herbId],
     queryFn: async () => {
-      const herbs = await base44.entities.Herb.filter({ id: herbId });
-      return herbs[0];
+      try {
+        const herbs = await base44.entities.Herb.filter({ id: herbId });
+        return herbs && herbs.length > 0 ? herbs[0] : null;
+      } catch (err) {
+        console.error("Error fetching herb:", err);
+        return null;
+      }
     },
     enabled: !!herbId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   if (isLoading) {
@@ -41,7 +50,7 @@ export default function HerbProfile() {
     );
   }
 
-  if (!herb) {
+  if (error || !herb) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center">
