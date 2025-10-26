@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -25,41 +24,24 @@ export default function ExploreHerbs() {
     queryKey: ['herbs'],
     queryFn: () => base44.entities.Herb.list('-created_date'),
     initialData: [],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
   });
 
-  // Remove duplicates based on common_name and botanical_name
-  const uniqueHerbs = useMemo(() => {
-    const seen = new Set();
-    return herbs.filter(herb => {
-      const key = `${herb.common_name?.toLowerCase()}-${herb.botanical_name?.toLowerCase()}`;
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    });
-  }, [herbs]);
+  const filteredHerbs = herbs.filter(herb => {
+    const matchesSearch = !searchQuery || 
+      herb.common_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      herb.botanical_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      herb.local_names?.some(name => name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesRegion = selectedRegion === "All" || herb.region === selectedRegion;
+    const matchesCategory = selectedCategory === "All" || herb.category === selectedCategory;
+    
+    const matchesCondition = !selectedCondition || 
+      herb.conditions_treated?.some(condition => 
+        condition.toLowerCase().includes(selectedCondition.toLowerCase())
+      );
 
-  const filteredHerbs = useMemo(() => {
-    return uniqueHerbs.filter(herb => {
-      const matchesSearch = !searchQuery || 
-        herb.common_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        herb.botanical_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        herb.local_names?.some(name => name.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesRegion = selectedRegion === "All" || herb.region === selectedRegion;
-      const matchesCategory = selectedCategory === "All" || herb.category === selectedCategory;
-      
-      const matchesCondition = !selectedCondition || 
-        herb.conditions_treated?.some(condition => 
-          condition.toLowerCase().includes(selectedCondition.toLowerCase())
-        );
-
-      return matchesSearch && matchesRegion && matchesCategory && matchesCondition;
-    });
-  }, [uniqueHerbs, searchQuery, selectedRegion, selectedCategory, selectedCondition]);
+    return matchesSearch && matchesRegion && matchesCategory && matchesCondition;
+  });
 
   const handleAISearch = async () => {
     if (!searchQuery) return;

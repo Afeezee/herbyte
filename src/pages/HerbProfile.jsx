@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -29,8 +28,6 @@ export default function HerbProfile() {
       return herbs[0];
     },
     enabled: !!herbId,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
   });
 
   if (isLoading) {
