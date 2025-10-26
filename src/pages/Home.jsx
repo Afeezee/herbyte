@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -12,7 +13,9 @@ export default function Home() {
   const { data: featuredHerbs, isLoading } = useQuery({
     queryKey: ['featured-herbs'],
     queryFn: () => base44.entities.Herb.filter({ featured: true }, '-created_date', 6),
-    initialData: []
+    initialData: [],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
   return (

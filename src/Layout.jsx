@@ -172,7 +172,15 @@ export default function Layout({ children, currentPageName }) {
                 © 2025 Herbyte. All rights reserved.
               </p>
               <p className="text-xs text-white/60 mt-1">
-                Developed by Cereus Technologies
+                Developed by{" "}
+                <a 
+                  href="https://cereustechnologies.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  Cereus Technologies
+                </a>
               </p>
             </div>
 
