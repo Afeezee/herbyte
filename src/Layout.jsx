@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -138,17 +137,6 @@ export default function Layout({ children, currentPageName }) {
         )}
       </header>
 
-      {/* Disclaimer Banner */}
-      <div className="bg-amber-50 border-b border-amber-200">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <Alert className="border-amber-300 bg-transparent">
-            <AlertDescription className="text-sm text-amber-900">
-              <strong>Medical Disclaimer:</strong> Information provided is for educational purposes only and does not replace professional medical advice. Always consult healthcare providers before using herbal remedies.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </div>
-
       {/* Main Content */}
       <main className="min-h-[calc(100vh-200px)]">
         {children}
@@ -201,7 +189,6 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-sm text-white/60">
-            <p className="mb-2">This platform does not provide medical advice. Always consult qualified healthcare professionals.</p>
             <p>
               Developed by{' '}
               <a 

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { createPageUrl } from '@base44/base44'; // Added import for createPageUrl
 
 export default function SubmitRemedy() {
   const queryClient = useQueryClient();
@@ -351,7 +352,7 @@ Be thorough, evidence-based, and prioritize user safety. Use actual research whe
                 Submit Another Remedy
               </Button>
               {moderationResult?.moderation_status === "Approved" && (
-                <Button variant="outline" onClick={() => window.location.href = "/explore-herbs"}>
+                <Button variant="outline" onClick={() => window.location.href = createPageUrl("ExploreHerbs")}>
                   View on Explore Page
                 </Button>
               )}
