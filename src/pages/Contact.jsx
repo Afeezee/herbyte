@@ -92,7 +92,7 @@ ${formData.message}
                 </div>
                 <h3 className="font-semibold text-lg text-[#2D5016] mb-2">Visit Us</h3>
                 <p className="text-gray-600">Lagos, Nigeria</p>
-                <p className="text-sm text-gray-500 mt-2">San Francisco, CA 94102</p>
+                <p className="text-sm text-gray-500 mt-2">West Africa</p>
               </CardContent>
             </Card>
           </div>
