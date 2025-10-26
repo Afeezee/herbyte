@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -10,20 +9,10 @@ import HerbCard from "../components/herbs/HerbCard";
 import TestimonialCard from "../components/home/TestimonialCard";
 
 export default function Home() {
-  const { data: featuredHerbs = [], isLoading } = useQuery({
+  const { data: featuredHerbs, isLoading } = useQuery({
     queryKey: ['featured-herbs'],
-    queryFn: async () => {
-      try {
-        const result = await base44.entities.Herb.filter({ featured: true }, '-created_date', 6);
-        return result || [];
-      } catch (err) {
-        console.error("Error fetching featured herbs:", err);
-        return [];
-      }
-    },
-    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
-    refetchOnWindowFocus: false, // Don't refetch when window regains focus
-    retry: 1, // Retry fetching once on failure
+    queryFn: () => base44.entities.Herb.filter({ featured: true }, '-created_date', 6),
+    initialData: [],
   });
 
   return (
