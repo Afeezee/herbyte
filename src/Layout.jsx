@@ -13,37 +13,37 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  SidebarTrigger } from
+"@/components/ui/sidebar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const navigationItems = [
-  {
-    title: "Home",
-    url: createPageUrl("Home"),
-    icon: Leaf,
-  },
-  {
-    title: "Explore Herbs",
-    url: createPageUrl("ExploreHerbs"),
-    icon: Search,
-  },
-  {
-    title: "Submit Remedy",
-    url: createPageUrl("SubmitRemedy"),
-    icon: Send,
-  },
-  {
-    title: "About Us",
-    url: createPageUrl("About"),
-    icon: Info,
-  },
-  {
-    title: "Contact",
-    url: createPageUrl("Contact"),
-    icon: Mail,
-  },
-];
+{
+  title: "Home",
+  url: createPageUrl("Home"),
+  icon: Leaf
+},
+{
+  title: "Explore Herbs",
+  url: createPageUrl("ExploreHerbs"),
+  icon: Search
+},
+{
+  title: "Submit Remedy",
+  url: createPageUrl("SubmitRemedy"),
+  icon: Send
+},
+{
+  title: "About Us",
+  url: createPageUrl("About"),
+  icon: Info
+},
+{
+  title: "Contact",
+  url: createPageUrl("Contact"),
+  icon: Mail
+}];
+
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -78,20 +78,20 @@ export default function Layout({ children, currentPageName }) {
             </Link>
 
             <nav className="flex items-center gap-8">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.title}
-                  to={item.url}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    location.pathname === item.url
-                      ? "text-[#2D5016] bg-[#4A7C2E]/10 font-medium"
-                      : "text-[#4B5563] hover:text-[#2D5016] hover:bg-[#F5F1E8]"
-                  }`}
-                >
+              {navigationItems.map((item) =>
+              <Link
+                key={item.title}
+                to={item.url}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                location.pathname === item.url ?
+                "text-[#2D5016] bg-[#4A7C2E]/10 font-medium" :
+                "text-[#4B5563] hover:text-[#2D5016] hover:bg-[#F5F1E8]"}`
+                }>
+
                   <item.icon className="w-4 h-4" />
                   <span>{item.title}</span>
                 </Link>
-              ))}
+              )}
             </nav>
           </div>
         </div>
@@ -109,32 +109,32 @@ export default function Layout({ children, currentPageName }) {
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-[#F5F1E8] transition-colors"
-            >
+              className="p-2 rounded-lg hover:bg-[#F5F1E8] transition-colors">
+
               <Menu className="w-6 h-6 text-[#2D5016]" />
             </button>
           </div>
         </div>
         
-        {mobileMenuOpen && (
-          <nav className="border-t border-[#2D5016]/10 bg-white p-4 space-y-2">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.title}
-                to={item.url}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  location.pathname === item.url
-                    ? "text-[#2D5016] bg-[#4A7C2E]/10 font-medium"
-                    : "text-[#4B5563] hover:bg-[#F5F1E8]"
-                }`}
-              >
+        {mobileMenuOpen &&
+        <nav className="border-t border-[#2D5016]/10 bg-white p-4 space-y-2">
+            {navigationItems.map((item) =>
+          <Link
+            key={item.title}
+            to={item.url}
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            location.pathname === item.url ?
+            "text-[#2D5016] bg-[#4A7C2E]/10 font-medium" :
+            "text-[#4B5563] hover:bg-[#F5F1E8]"}`
+            }>
+
                 <item.icon className="w-5 h-5" />
                 <span>{item.title}</span>
               </Link>
-            ))}
+          )}
           </nav>
-        )}
+        }
       </header>
 
       {/* Disclaimer Banner */}
@@ -167,24 +167,24 @@ export default function Layout({ children, currentPageName }) {
               <p className="text-white/80 leading-relaxed mb-4">
                 Evidence-based herbal medicine information platform dedicated to preserving indigenous knowledge while ensuring scientific validation and safety.
               </p>
-              <p className="text-xs text-white/60">
-                © 2025 Herbyte. All rights reserved.
+              <p className="text-xs text-white/60">© 2025 Herbyte. All rights reserved.
+Developed by Cereus Technologies
               </p>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                {navigationItems.map((item) => (
-                  <li key={item.title}>
+                {navigationItems.map((item) =>
+                <li key={item.title}>
                     <Link
-                      to={item.url}
-                      className="text-white/80 hover:text-white transition-colors text-sm"
-                    >
+                    to={item.url}
+                    className="text-white/80 hover:text-white transition-colors text-sm">
+
                       {item.title}
                     </Link>
                   </li>
-                ))}
+                )}
               </ul>
             </div>
 
@@ -204,6 +204,6 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
