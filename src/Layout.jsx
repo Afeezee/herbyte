@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Leaf, Search, Send, Info, Mail, Menu } from "lucide-react";
