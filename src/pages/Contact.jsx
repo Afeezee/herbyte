@@ -80,7 +80,7 @@ ${formData.message}
                   <Phone className="w-7 h-7 text-[#2D5016]" />
                 </div>
                 <h3 className="font-semibold text-lg text-[#2D5016] mb-2">Call Us</h3>
-                <p className="text-gray-600">+1 (555) 123-4567</p>
+                <p className="text-gray-600">+2347014623270</p>
                 <p className="text-sm text-gray-500 mt-2">Mon-Fri, 9am-5pm EST</p>
               </CardContent>
             </Card>
