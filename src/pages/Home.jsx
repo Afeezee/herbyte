@@ -12,7 +12,7 @@ export default function Home() {
   const { data: featuredHerbs, isLoading } = useQuery({
     queryKey: ['featured-herbs'],
     queryFn: () => base44.entities.Herb.filter({ featured: true }, '-created_date', 6),
-    initialData: [],
+    initialData: []
   });
 
   return (
@@ -47,7 +47,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link to={createPageUrl("SubmitRemedy")}>
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="bg-background text-[#2D5016] px-8 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-10 border-white hover:bg-white/10 w-full sm:w-auto">
                     Share Your Remedy
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
@@ -57,11 +57,11 @@ export default function Home() {
 
             <div className="hidden md:block">
               <div className="relative">
-                <img 
-                  src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=600&fit=crop" 
-                  alt="Herbal medicine" 
-                  className="rounded-2xl shadow-2xl"
-                />
+                <img
+                  src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=600&fit=crop"
+                  alt="Herbal medicine"
+                  className="rounded-2xl shadow-2xl" />
+
                 <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-[#4A7C2E]/10 rounded-full flex items-center justify-center">
@@ -159,23 +159,23 @@ export default function Home() {
             </Link>
           </div>
 
-          {isLoading ? (
-            <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="bg-gray-100 rounded-xl h-80 animate-pulse"></div>
-              ))}
-            </div>
-          ) : featuredHerbs.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredHerbs.map(herb => (
-                <HerbCard key={herb.id} herb={herb} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-xl">
+          {isLoading ?
+          <div className="grid md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) =>
+            <div key={i} className="bg-gray-100 rounded-xl h-80 animate-pulse"></div>
+            )}
+            </div> :
+          featuredHerbs.length > 0 ?
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredHerbs.map((herb) =>
+            <HerbCard key={herb.id} herb={herb} />
+            )}
+            </div> :
+
+          <div className="text-center py-12 bg-gray-50 rounded-xl">
               <p className="text-gray-500">Featured herbs will appear here soon</p>
             </div>
-          )}
+          }
         </div>
       </section>
 
@@ -190,21 +190,21 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <TestimonialCard 
+            <TestimonialCard
               name="Dr. Sarah Mitchell"
               role="Naturopathic Doctor"
-              content="Herbyte has become an invaluable resource in my practice. The evidence-based approach and AI safety features give me confidence in recommending herbs to my patients."
-            />
-            <TestimonialCard 
+              content="Herbyte has become an invaluable resource in my practice. The evidence-based approach and AI safety features give me confidence in recommending herbs to my patients." />
+
+            <TestimonialCard
               name="James Chen"
               role="Traditional Medicine Practitioner"
-              content="Finally, a platform that respects indigenous knowledge while ensuring scientific rigor. The AI guidance feature helps me verify traditional remedies with modern research."
-            />
-            <TestimonialCard 
+              content="Finally, a platform that respects indigenous knowledge while ensuring scientific rigor. The AI guidance feature helps me verify traditional remedies with modern research." />
+
+            <TestimonialCard
               name="Maria Rodriguez"
               role="Wellness Enthusiast"
-              content="I love how easy it is to find safe herbal alternatives. The personalized AI insights help me understand which herbs are right for my specific health needs."
-            />
+              content="I love how easy it is to find safe herbal alternatives. The personalized AI insights help me understand which herbs are right for my specific health needs." />
+
           </div>
         </div>
       </section>
@@ -233,6 +233,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 }
