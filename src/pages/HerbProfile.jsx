@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -13,13 +14,11 @@ import {
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import AIPersonalizedInsight from "../components/herbs/AIPersonalizedInsight";
-import AIAssistant from "../components/herbs/AIAssistant";
 
 export default function HerbProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const herbId = urlParams.get('id');
   const [showAIInsight, setShowAIInsight] = useState(false);
-  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   const { data: herb, isLoading } = useQuery({
     queryKey: ['herb', herbId],
@@ -140,23 +139,13 @@ export default function HerbProfile() {
                 {herb.description}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={() => setShowAIInsight(true)}
-                  className="bg-[#4A7C2E] hover:bg-[#2D5016] flex-1 sm:flex-none"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get Personalized AI Insight
-                </Button>
-                <Button 
-                  onClick={() => setShowAIAssistant(true)}
-                  variant="outline"
-                  className="border-[#2D5016] text-[#2D5016] hover:bg-[#F5F1E8] flex-1 sm:flex-none"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  AI Herbal Assistant
-                </Button>
-              </div>
+              <Button 
+                onClick={() => setShowAIInsight(true)}
+                className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Get Personalized AI Insight
+              </Button>
             </div>
           </div>
         </Card>
@@ -384,17 +373,11 @@ export default function HerbProfile() {
         </Tabs>
       </div>
 
-      {/* AI Modals */}
+      {/* AI Personalized Insight Modal */}
       {showAIInsight && (
         <AIPersonalizedInsight 
           herb={herb} 
           onClose={() => setShowAIInsight(false)} 
-        />
-      )}
-
-      {showAIAssistant && (
-        <AIAssistant 
-          onClose={() => setShowAIAssistant(false)} 
         />
       )}
     </div>
