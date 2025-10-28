@@ -4,14 +4,14 @@ import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Users, Sparkles, Search, BookOpen, CheckCircle } from "lucide-react";
-import HerbCard from "../components/herbs/HerbCard";
+import { ArrowRight, Shield, Users, Sparkles, Search, BookOpen, CheckCircle, Beaker, Leaf, ShoppingBag } from "lucide-react";
+import RemedyCard from "../components/remedies/RemedyCard";
 import TestimonialCard from "../components/home/TestimonialCard";
 
 export default function Home() {
-  const { data: featuredHerbs, isLoading } = useQuery({
-    queryKey: ['featured-herbs'],
-    queryFn: () => base44.entities.Herb.filter({ featured: true }, '-created_date', 6),
+  const { data: featuredRemedies, isLoading } = useQuery({
+    queryKey: ['featured-remedies'],
+    queryFn: () => base44.entities.Remedy.filter({ featured: true, approved_by_ai: true }, '-created_date', 6),
     initialData: []
   });
 
@@ -28,28 +28,28 @@ export default function Home() {
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-medium">AI-Powered Herbal Guidance</span>
+                <span className="text-sm font-medium">AI-Validated Herbal Knowledge</span>
               </div>
               
               <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-                Evidence-Based Herbal Medicine at Your Fingertips
+                Your Complete Herbal Medicine Resource
               </h1>
               
               <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed">
-                Discover verified herbal remedies backed by scientific research and indigenous wisdom. Get personalized AI guidance for safe and effective natural healing.
+                Discover evidence-based herbal remedies, learn about medicinal plants, and shop quality products—all in one trusted platform backed by AI safety validation and scientific research.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to={createPageUrl("ExploreHerbs")}>
+                <Link to={createPageUrl("ExploreRemedies")}>
                   <Button size="lg" className="bg-white text-[#2D5016] hover:bg-white/90 w-full sm:w-auto">
-                    <Search className="w-5 h-5 mr-2" />
-                    Explore Herbs
+                    <Beaker className="w-5 h-5 mr-2" />
+                    Find Remedies
                   </Button>
                 </Link>
-                <Link to={createPageUrl("SubmitRemedy")}>
+                <Link to={createPageUrl("ExploreHerbs")}>
                   <Button size="lg" variant="outline" className="bg-background text-[#2D5016] px-8 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-10 border-white hover:bg-white/10 w-full sm:w-auto">
-                    Share Your Remedy
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <Leaf className="w-5 h-5 mr-2" />
+                    Learn About Herbs
                   </Button>
                 </Link>
               </div>
@@ -79,26 +79,113 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Mission Statement */}
+      {/* What We Offer Section */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2D5016] mb-6">
-            Our Mission
-          </h2>
-          <p className="text-lg text-gray-700 leading-relaxed max-w-3xl mx-auto">
-            Herbyte bridges traditional herbal wisdom with modern scientific validation. We preserve indigenous knowledge while ensuring every remedy meets rigorous safety and efficacy standards through AI-powered moderation and expert review.
-          </p>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2D5016] mb-4">
+              Everything You Need for Herbal Wellness
+            </h2>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              Herbyte is your comprehensive platform for herbal medicine—combining education, community wisdom, and a trusted marketplace
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Link to={createPageUrl("ExploreRemedies")} className="group">
+              <div className="bg-gradient-to-br from-[#4A7C2E]/5 to-[#2D5016]/5 rounded-xl p-8 hover:shadow-xl transition-all duration-300 h-full border-2 border-transparent group-hover:border-[#4A7C2E]/20">
+                <div className="w-14 h-14 bg-[#4A7C2E]/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Beaker className="w-7 h-7 text-[#2D5016]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
+                  Herbal Remedies
+                </h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Browse hundreds of traditional and modern herbal remedy formulations. Each recipe includes preparation methods, dosage guidance, and safety information validated by AI.
+                </p>
+                <div className="flex items-center text-[#4A7C2E] font-medium">
+                  <span className="text-sm">Explore Remedies</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+
+            <Link to={createPageUrl("ExploreHerbs")} className="group">
+              <div className="bg-gradient-to-br from-[#4A7C2E]/5 to-[#2D5016]/5 rounded-xl p-8 hover:shadow-xl transition-all duration-300 h-full border-2 border-transparent group-hover:border-[#4A7C2E]/20">
+                <div className="w-14 h-14 bg-[#4A7C2E]/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Leaf className="w-7 h-7 text-[#2D5016]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
+                  Medicinal Herbs
+                </h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Learn about individual medicinal plants from around the world. Discover their properties, health benefits, active compounds, and traditional uses backed by research.
+                </p>
+                <div className="flex items-center text-[#4A7C2E] font-medium">
+                  <span className="text-sm">Browse Herbs</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+
+            <Link to={createPageUrl("ExploreProducts")} className="group">
+              <div className="bg-gradient-to-br from-[#4A7C2E]/5 to-[#2D5016]/5 rounded-xl p-8 hover:shadow-xl transition-all duration-300 h-full border-2 border-transparent group-hover:border-[#4A7C2E]/20">
+                <div className="w-14 h-14 bg-[#4A7C2E]/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <ShoppingBag className="w-7 h-7 text-[#2D5016]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
+                  Shop Products
+                </h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Purchase ready-made herbal products from verified practitioners and sellers. Every product is linked to remedies and undergoes quality verification.
+                </p>
+                <div className="flex items-center text-[#4A7C2E] font-medium">
+                  <span className="text-sm">Shop Now</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Statement */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-[#F5F1E8] to-[#FFFEF9]">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2D5016] mb-6">
+              Bridging Traditional Wisdom with Modern Science
+            </h2>
+            <p className="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
+              Herbyte preserves indigenous herbal knowledge while ensuring every remedy and herb profile meets rigorous safety standards through AI-powered validation and expert review. We're building the world's most comprehensive, trustworthy herbal medicine resource.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl p-6 shadow-md text-center">
+              <div className="text-3xl font-bold text-[#2D5016] mb-2">1000+</div>
+              <p className="text-gray-600">Verified Remedies</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-md text-center">
+              <div className="text-3xl font-bold text-[#2D5016] mb-2">500+</div>
+              <p className="text-gray-600">Medicinal Herbs</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-md text-center">
+              <div className="text-3xl font-bold text-[#2D5016] mb-2">100%</div>
+              <p className="text-gray-600">AI Safety Verified</p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Why Choose Herbyte */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-[#F5F1E8] to-[#FFFEF9]">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#2D5016] mb-4">
-              Why Choose Herbyte?
+              Why Trust Herbyte?
             </h2>
-            <p className="text-gray-600 text-lg">Trusted, verified, and scientifically validated herbal information</p>
+            <p className="text-gray-600 text-lg">The only platform combining herbal education with verified marketplace</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -110,7 +197,7 @@ export default function Home() {
                 AI Safety Verification
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Every herb and remedy is analyzed by advanced AI to identify potential risks, drug interactions, and contraindications before publication.
+                Every remedy submission is analyzed by advanced AI to identify potential risks, drug interactions, contraindications, and scientific validity before publication.
               </p>
             </div>
 
@@ -119,10 +206,10 @@ export default function Home() {
                 <BookOpen className="w-7 h-7 text-[#2D5016]" />
               </div>
               <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
-                Evidence-Based Research
+                Evidence-Based Information
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                All information is backed by peer-reviewed studies, clinical trials, and reputable phytotherapy research from trusted medical sources.
+                All herb and remedy information is backed by peer-reviewed research, clinical trials, and reputable phytotherapy sources from trusted medical databases.
               </p>
             </div>
 
@@ -131,27 +218,27 @@ export default function Home() {
                 <Users className="w-7 h-7 text-[#2D5016]" />
               </div>
               <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
-                Community-Driven Knowledge
+                Trusted Marketplace
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Share traditional remedies from your culture while contributing to a global database of verified herbal medicine practices.
+                Connect with verified herbal practitioners and sellers. Every product listing is moderated and linked to validated remedy formulations for transparency.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Herbs */}
-      <section className="py-16 md:py-24 bg-white">
+      {/* Featured Remedies */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-[#F5F1E8] to-[#FFFEF9]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-[#2D5016] mb-2">
-                Featured Herbs
+                Featured Remedies
               </h2>
-              <p className="text-gray-600">Explore our most trusted and well-researched herbal remedies</p>
+              <p className="text-gray-600">Explore our most trusted and well-researched herbal formulations</p>
             </div>
-            <Link to={createPageUrl("ExploreHerbs")}>
+            <Link to={createPageUrl("ExploreRemedies")}>
               <Button variant="outline" className="border-[#2D5016] text-[#2D5016] hover:bg-[#2D5016] hover:text-white">
                 View All
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -159,23 +246,23 @@ export default function Home() {
             </Link>
           </div>
 
-          {isLoading ?
-          <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) =>
-            <div key={i} className="bg-gray-100 rounded-xl h-80 animate-pulse"></div>
-            )}
-            </div> :
-          featuredHerbs.length > 0 ?
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredHerbs.map((herb) =>
-            <HerbCard key={herb.id} herb={herb} />
-            )}
-            </div> :
-
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-              <p className="text-gray-500">Featured herbs will appear here soon</p>
+          {isLoading ? (
+            <div className="grid md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-gray-100 rounded-xl h-80 animate-pulse"></div>
+              ))}
             </div>
-          }
+          ) : featuredRemedies.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredRemedies.map((remedy) => (
+                <RemedyCard key={remedy.id} remedy={remedy} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-xl">
+              <p className="text-gray-500">Featured remedies will appear here soon</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -184,7 +271,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Trusted by Herbal Medicine Enthusiasts
+              Trusted by Practitioners & Enthusiasts
             </h2>
             <p className="text-white/80 text-lg">Real experiences from our community members</p>
           </div>
@@ -193,18 +280,17 @@ export default function Home() {
             <TestimonialCard
               name="Dr. Sarah Mitchell"
               role="Naturopathic Doctor"
-              content="Herbyte has become an invaluable resource in my practice. The evidence-based approach and AI safety features give me confidence in recommending herbs to my patients." />
+              content="Herbyte has become an invaluable resource in my practice. The clear distinction between individual herbs and remedy formulations, combined with AI safety features, gives me confidence in my recommendations." />
 
             <TestimonialCard
               name="James Chen"
               role="Traditional Medicine Practitioner"
-              content="Finally, a platform that respects indigenous knowledge while ensuring scientific rigor. The AI guidance feature helps me verify traditional remedies with modern research." />
+              content="Finally, a platform that respects indigenous knowledge while ensuring scientific rigor. I can now share my traditional remedy formulations knowing they're validated and preserved for future generations." />
 
             <TestimonialCard
               name="Maria Rodriguez"
-              role="Wellness Enthusiast"
-              content="I love how easy it is to find safe herbal alternatives. The personalized AI insights help me understand which herbs are right for my specific health needs." />
-
+              role="Herbalist & Seller"
+              content="The marketplace integration is brilliant. I can showcase my products directly alongside the remedies they're based on. Customers love having both educational resources and ready-made options." />
           </div>
         </div>
       </section>
@@ -213,26 +299,31 @@ export default function Home() {
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-[#2D5016] mb-6">
-            Ready to Discover Natural Healing?
+            Join the Herbal Medicine Revolution
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Start exploring our comprehensive database of verified herbal remedies or share your own traditional knowledge with our community.
+            Whether you're seeking natural remedies, want to learn about medicinal plants, or ready to share your expertise—Herbyte welcomes you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={createPageUrl("ExploreHerbs")}>
+            <Link to={createPageUrl("ExploreRemedies")}>
               <Button size="lg" className="bg-[#2D5016] hover:bg-[#4A7C2E] w-full sm:w-auto">
-                <Search className="w-5 h-5 mr-2" />
-                Start Exploring
+                <Beaker className="w-5 h-5 mr-2" />
+                Explore Remedies
               </Button>
             </Link>
             <Link to={createPageUrl("SubmitRemedy")}>
               <Button size="lg" variant="outline" className="border-[#2D5016] text-[#2D5016] hover:bg-[#F5F1E8] w-full sm:w-auto">
-                Submit a Remedy
+                Share a Remedy
+              </Button>
+            </Link>
+            <Link to={createPageUrl("SellerDashboard")}>
+              <Button size="lg" variant="outline" className="border-[#2D5016] text-[#2D5016] hover:bg-[#F5F1E8] w-full sm:w-auto">
+                Become a Seller
               </Button>
             </Link>
           </div>
         </div>
       </section>
-    </div>);
-
+    </div>
+  );
 }
