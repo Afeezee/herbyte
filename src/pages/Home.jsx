@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Users, Sparkles, Search, BookOpen, CheckCircle, Beaker, Leaf, ShoppingBag } from "lucide-react";
+import { ArrowRight, Shield, Users, Sparkles, Search, BookOpen, CheckCircle, Beaker, Leaf, ShoppingBag, Store } from "lucide-react";
 import RemedyCard from "../components/remedies/RemedyCard";
 import TestimonialCard from "../components/home/TestimonialCard";
 
@@ -50,6 +50,12 @@ export default function Home() {
                   <Button size="lg" variant="outline" className="bg-background text-[#2D5016] px-8 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-10 border-white hover:bg-white/10 w-full sm:w-auto">
                     <Leaf className="w-5 h-5 mr-2" />
                     Learn About Herbs
+                  </Button>
+                </Link>
+                <Link to={createPageUrl("SellerDashboard")}>
+                  <Button size="lg" variant="outline" className="bg-background text-[#2D5016] px-8 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground h-10 border-white hover:bg-white/10 w-full sm:w-auto">
+                    <Store className="w-5 h-5 mr-2" />
+                    Become a Seller
                   </Button>
                 </Link>
               </div>
@@ -98,7 +104,7 @@ export default function Home() {
                   <Beaker className="w-7 h-7 text-[#2D5016]" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
-                  Herbal Remedies
+                  Find Herbal Remedies
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
                   Browse hundreds of traditional and modern herbal remedy formulations. Each recipe includes preparation methods, dosage guidance, and safety information validated by AI.
@@ -116,7 +122,7 @@ export default function Home() {
                   <Leaf className="w-7 h-7 text-[#2D5016]" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
-                  Medicinal Herbs
+                  Learn About Herbs
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
                   Learn about individual medicinal plants from around the world. Discover their properties, health benefits, active compounds, and traditional uses backed by research.
@@ -128,19 +134,19 @@ export default function Home() {
               </div>
             </Link>
 
-            <Link to={createPageUrl("ExploreProducts")} className="group">
+            <Link to={createPageUrl("SellerDashboard")} className="group">
               <div className="bg-gradient-to-br from-[#4A7C2E]/5 to-[#2D5016]/5 rounded-xl p-8 hover:shadow-xl transition-all duration-300 h-full border-2 border-transparent group-hover:border-[#4A7C2E]/20">
                 <div className="w-14 h-14 bg-[#4A7C2E]/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <ShoppingBag className="w-7 h-7 text-[#2D5016]" />
+                  <Store className="w-7 h-7 text-[#2D5016]" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#2D5016] mb-3">
-                  Shop Products
+                  Become a Seller
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Purchase ready-made herbal products from verified practitioners and sellers. Every product is linked to remedies and undergoes quality verification.
+                  Are you a herbal practitioner? Join our community and share your products with people seeking natural remedies. Get verified and start selling today.
                 </p>
                 <div className="flex items-center text-[#4A7C2E] font-medium">
-                  <span className="text-sm">Shop Now</span>
+                  <span className="text-sm">Setup Your Store</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
