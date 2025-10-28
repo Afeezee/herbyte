@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -82,27 +83,39 @@ export default function SellerDashboard() {
     );
   }
 
+  // Not a seller and no profile - show become a seller page
   if (!user.is_seller && !sellerProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <Card className="max-w-2xl w-full">
-          <CardContent className="p-8 text-center">
-            <Store className="w-16 h-16 text-[#4A7C2E] mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-[#2D5016] mb-4">Become a Seller</h2>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Join our community of herbal medicine practitioners and sellers. Share your products with people seeking natural remedies.
-            </p>
-            <Button 
-              size="lg"
-              className="bg-[#4A7C2E] hover:bg-[#2D5016]"
-              onClick={() => setEditingProfile(true)}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create Seller Profile
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <>
+        <div className="min-h-screen flex items-center justify-center px-6">
+          <Card className="max-w-2xl w-full">
+            <CardContent className="p-8 text-center">
+              <Store className="w-16 h-16 text-[#4A7C2E] mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-[#2D5016] mb-4">Become a Seller</h2>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Join our community of herbal medicine practitioners and sellers. Share your products with people seeking natural remedies.
+              </p>
+              <Button 
+                size="lg"
+                className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+                onClick={() => setEditingProfile(true)}
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create Seller Profile
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Profile Form Modal - Rendered outside the card so it can be shown */}
+        {editingProfile && (
+          <ProfileFormModal
+            profile={null} // Pass null for creation
+            userId={user.id}
+            onClose={() => setEditingProfile(false)}
+          />
+        )}
+      </>
     );
   }
 
@@ -135,10 +148,16 @@ export default function SellerDashboard() {
                 onEdit={() => setEditingProfile(true)} 
               />
             ) : (
-              <ProfileForm 
-                onCancel={() => setEditingProfile(false)}
-                userId={user.id}
-              />
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Store className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No profile yet</h3>
+                  <p className="text-gray-600 mb-6">Create your seller profile to get started</p>
+                  <Button onClick={() => setEditingProfile(true)}>
+                    Create Profile
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 
@@ -304,7 +323,7 @@ function ProfileFormModal({ profile, userId, onClose }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['seller-profile'] });
-      onClose();
+      window.location.reload(); // Reload to show dashboard correctly with new seller status
     },
   });
 
@@ -472,7 +491,11 @@ function ProfileFormModal({ profile, userId, onClose }) {
             )}
 
             <div className="flex gap-3">
-              <Button type="submit" className="flex-1 bg-[#4A7C2E] hover:bg-[#2D5016]">
+              <Button 
+                type="submit" 
+                className="flex-1 bg-[#4A7C2E] hover:bg-[#2D5016]"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
                 {profile ? "Update Profile" : "Create Profile"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose}>
