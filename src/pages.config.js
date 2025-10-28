@@ -5,6 +5,7 @@ import SubmitRemedy from './pages/SubmitRemedy';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import ExploreRemedies from './pages/ExploreRemedies';
+import RemedyProfile from './pages/RemedyProfile';
 import Layout from './Layout.jsx';
 
 
@@ -16,6 +17,7 @@ export const PAGES = {
     "About": About,
     "Contact": Contact,
     "ExploreRemedies": ExploreRemedies,
+    "RemedyProfile": RemedyProfile,
 }
 
 export const pagesConfig = {
