@@ -81,7 +81,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Desktop Header */}
-      <header className="hidden md:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#2D5016]/10 shadow-sm">
+      <header className="hidden lg:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#2D5016]/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to={createPageUrl("Home")} className="flex items-center gap-3 group">
@@ -107,6 +107,42 @@ export default function Layout({ children, currentPageName }) {
                 >
                   <item.icon className="w-4 h-4" />
                   <span className="text-sm">{item.title}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Tablet Header */}
+      <header className="hidden md:block lg:hidden sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#2D5016]/10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <Link to={createPageUrl("Home")} className="flex items-center gap-3 group">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                  <Leaf className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-[#2D5016] tracking-tight">Herbyte</h1>
+                  <p className="text-xs text-[#4A7C2E]">Evidence-Based Herbal Medicine</p>
+                </div>
+              </Link>
+            </div>
+
+            <nav className="flex flex-wrap items-center gap-3">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.title}
+                  to={item.url}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm ${
+                    location.pathname === item.url
+                      ? "text-[#2D5016] bg-[#4A7C2E]/10 font-medium"
+                      : "text-[#4B5563] hover:text-[#2D5016] hover:bg-[#F5F1E8]"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.title}</span>
                 </Link>
               ))}
             </nav>
