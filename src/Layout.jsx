@@ -1,8 +1,7 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle } from "lucide-react";
+import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +25,12 @@ const navigationItems = [
     icon: Leaf,
   },
   {
-    title: "Explore Herbs",
+    title: "Explore Remedies",
+    url: createPageUrl("ExploreRemedies"),
+    icon: Beaker,
+  },
+  {
+    title: "Browse Herbs",
     url: createPageUrl("ExploreHerbs"),
     icon: Search,
   },
@@ -80,7 +84,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </Link>
 
-            <nav className="flex items-center gap-8">
+            <nav className="flex items-center gap-6">
               {navigationItems.map((item) => (
                 <Link
                   key={item.title}
@@ -92,7 +96,7 @@ export default function Layout({ children, currentPageName }) {
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
-                  <span>{item.title}</span>
+                  <span className="text-sm">{item.title}</span>
                 </Link>
               ))}
             </nav>
