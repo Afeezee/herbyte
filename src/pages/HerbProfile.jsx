@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Leaf, MapPin, AlertTriangle, Beaker, BookOpen, 
-  Heart, Shield, Pill, Sparkles, ArrowLeft, Edit, Trash2
+  Heart, Shield, Pill, Sparkles, ArrowLeft, Edit, Trash2, User
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -19,8 +19,8 @@ export default function HerbProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const herbId = urlParams.get('id');
   const [showAIInsight, setShowAIInsight] = useState(false);
-  const [user, setUser] = useState(null); // Added state for user
-  const queryClient = useQueryClient(); // Added useQueryClient hook
+  const [user, setUser] = useState(null);
+  const queryClient = useQueryClient();
 
   // Fetch current user
   React.useEffect(() => {
@@ -30,7 +30,6 @@ export default function HerbProfile() {
         setUser(currentUser);
       } catch (error) {
         console.error("Error fetching user:", error);
-        // Optionally, handle unauthenticated state if base44.auth.me() throws for no user
       }
     };
     fetchUser();
@@ -45,14 +44,11 @@ export default function HerbProfile() {
     enabled: !!herbId,
   });
 
-  // Added delete mutation
   const deleteMutation = useMutation({
     mutationFn: () => base44.entities.Herb.delete(herbId),
     onSuccess: () => {
       alert("Herb deleted successfully!");
-      queryClient.invalidateQueries(['herb', herbId]); // Invalidate specific herb query
-      queryClient.invalidateQueries(['herbs']); // Invalidate general herbs list query
-      window.location.href = createPageUrl("ExploreHerbs"); // Redirect after successful deletion
+      window.location.href = createPageUrl("ExploreHerbs");
     },
     onError: (error) => {
       alert(`Error deleting herb: ${error.message}`);
@@ -60,14 +56,12 @@ export default function HerbProfile() {
     }
   });
 
-  // Added handleDelete function
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete "${herb.common_name}"? This action cannot be undone.`)) {
       deleteMutation.mutate();
     }
   };
 
-  // Check if current user is admin
   const isAdmin = user?.role === "admin";
 
   if (isLoading) {
@@ -100,19 +94,19 @@ export default function HerbProfile() {
       <section className="bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] text-white py-8">
         <div className="max-w-7xl mx-auto px-6">
           {/* Modified: Added flex container for back link and admin buttons */}
-          <div className="flex items-center justify-between mb-6">
-            <Link to={createPageUrl("ExploreHerbs")} className="inline-flex items-center gap-2 text-white/80 hover:text-white">
+          <div className="flex items-center justify-between">
+            <Link to={createPageUrl("ExploreHerbs")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
               <ArrowLeft className="w-4 h-4" />
               Back to Explore
             </Link>
             
             {isAdmin && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 mb-6">
                 <Button
                   variant="outline"
                   size="sm"
                   className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => alert("Edit functionality - coming soon or implement modal")} // Placeholder for edit functionality
+                  onClick={() => alert("Edit functionality - coming soon or implement modal")}
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Herb
@@ -122,10 +116,10 @@ export default function HerbProfile() {
                   size="sm"
                   className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
                   onClick={handleDelete}
-                  disabled={deleteMutation.isPending} // Disable button during deletion
+                  disabled={deleteMutation.isPending}
                 >
-                  {deleteMutation.isPending ? "Deleting..." : <Trash2 className="w-4 h-4 mr-2" />}
-                  {deleteMutation.isPending ? "" : "Delete"}
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
                 </Button>
               </div>
             )}
@@ -140,6 +134,16 @@ export default function HerbProfile() {
             <Shield className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-900">
               <strong>Admin Mode:</strong> You can edit or delete this herb record.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Contributor Badge */}
+        {herb.submitted_by && herb.community_contributed && (
+          <Alert className="mb-4 bg-green-50 border-green-200">
+            <User className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-900">
+              <strong>Community Contribution:</strong> Submitted by {herb.submitted_by}
             </AlertDescription>
           </Alert>
         )}
@@ -175,6 +179,12 @@ export default function HerbProfile() {
                   {herb.local_names && herb.local_names.length > 0 && (
                     <p className="text-sm text-gray-500">
                       Also known as: {herb.local_names.join(", ")}
+                    </p>
+                  )}
+                  {herb.submitted_by && (
+                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      Contributed by: {herb.submitted_by}
                     </p>
                   )}
                 </div>

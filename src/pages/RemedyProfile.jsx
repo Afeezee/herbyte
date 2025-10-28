@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Leaf, AlertTriangle, BookOpen, 
-  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles, ExternalLink, Edit, Trash2
+  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles, ExternalLink, Edit, Trash2, User
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -20,8 +20,8 @@ export default function RemedyProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const remedyId = urlParams.get('id');
   const [showAIInsight, setShowAIInsight] = useState(false);
-  const [user, setUser] = useState(null); // Added user state
-  const queryClient = useQueryClient(); // Added queryClient initialization
+  const [user, setUser] = useState(null);
+  const queryClient = useQueryClient();
 
   // Fetch current user
   React.useEffect(() => {
@@ -65,17 +65,14 @@ export default function RemedyProfile() {
     queryFn: async () => {
       if (!remedy?.herbs_used || remedy.herbs_used.length === 0) return [];
       
-      // Get all herbs and find matches
       const allHerbs = await base44.entities.Herb.list();
       
-      // Match herbs by checking if herb name contains or is contained in the remedy herb names
       const matchedHerbs = allHerbs.filter(herb => {
         return remedy.herbs_used.some(remedyHerbName => {
           const herbCommonName = herb.common_name.toLowerCase();
           const herbBotanicalName = herb.botanical_name?.toLowerCase() || '';
           const remedyHerb = remedyHerbName.toLowerCase();
           
-          // Check if names match (exact or partial)
           return herbCommonName.includes(remedyHerb) || 
                  remedyHerb.includes(herbCommonName) ||
                  herbBotanicalName.includes(remedyHerb) ||
@@ -89,26 +86,24 @@ export default function RemedyProfile() {
     initialData: [],
   });
 
-  // Added delete mutation
   const deleteMutation = useMutation({
     mutationFn: () => base44.entities.Remedy.delete(remedyId),
     onSuccess: () => {
       alert("Remedy deleted successfully!");
-      window.location.href = createPageUrl("ExploreRemedies"); // Redirect after deletion
+      window.location.href = createPageUrl("ExploreRemedies");
     },
     onError: (error) => {
         alert(`Error deleting remedy: ${error.message}`);
     }
   });
 
-  // Added handleDelete function
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete "${remedy.name}"? This action cannot be undone.`)) {
       deleteMutation.mutate();
     }
   };
 
-  const isAdmin = user?.role === "admin"; // Added isAdmin check
+  const isAdmin = user?.role === "admin";
 
   if (remedyLoading) {
     return (
@@ -134,7 +129,6 @@ export default function RemedyProfile() {
     );
   }
 
-  // Helper function to check if a herb name has a corresponding herb entity
   const getHerbForName = (herbName) => {
     if (!availableHerbs) return null;
     
@@ -155,7 +149,6 @@ export default function RemedyProfile() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] text-white py-8">
         <div className="max-w-7xl mx-auto px-6">
-          {/* Added admin buttons */}
           <div className="flex items-center justify-between">
             <Link to={createPageUrl("ExploreRemedies")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
               <ArrowLeft className="w-4 h-4" />
@@ -200,6 +193,16 @@ export default function RemedyProfile() {
           </Alert>
         )}
 
+        {/* Contributor Badge */}
+        {remedy.submitted_by && (
+          <Alert className="mb-4 bg-green-50 border-green-200">
+            <User className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-900">
+              <strong>Community Contribution:</strong> This remedy was submitted by a community member.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Main Content Card */}
         <Card className="overflow-hidden shadow-xl mb-8">
           <div className="grid md:grid-cols-3 gap-8">
@@ -233,6 +236,12 @@ export default function RemedyProfile() {
                   <p className="text-sm text-gray-500">
                     Primary Herb: {remedy.primary_herb_name}
                   </p>
+                  {remedy.submitted_by && (
+                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      Contributed by: {remedy.submitted_by}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
