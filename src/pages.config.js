@@ -6,6 +6,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import ExploreRemedies from './pages/ExploreRemedies';
 import RemedyProfile from './pages/RemedyProfile';
+import SellerDashboard from './pages/SellerDashboard';
 import Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "Contact": Contact,
     "ExploreRemedies": ExploreRemedies,
     "RemedyProfile": RemedyProfile,
+    "SellerDashboard": SellerDashboard,
 }
 
 export const pagesConfig = {
