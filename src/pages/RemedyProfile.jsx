@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Leaf, AlertTriangle, BookOpen, 
-  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles
+  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles, ExternalLink
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -43,6 +43,36 @@ export default function RemedyProfile() {
     initialData: [],
   });
 
+  // Query to find herbs used in this remedy
+  const { data: availableHerbs, isLoading: herbsLoading } = useQuery({
+    queryKey: ['herbs-for-remedy', remedy?.herbs_used],
+    queryFn: async () => {
+      if (!remedy?.herbs_used || remedy.herbs_used.length === 0) return [];
+      
+      // Get all herbs and find matches
+      const allHerbs = await base44.entities.Herb.list();
+      
+      // Match herbs by checking if herb name contains or is contained in the remedy herb names
+      const matchedHerbs = allHerbs.filter(herb => {
+        return remedy.herbs_used.some(remedyHerbName => {
+          const herbCommonName = herb.common_name.toLowerCase();
+          const herbBotanicalName = herb.botanical_name?.toLowerCase() || '';
+          const remedyHerb = remedyHerbName.toLowerCase();
+          
+          // Check if names match (exact or partial)
+          return herbCommonName.includes(remedyHerb) || 
+                 remedyHerb.includes(herbCommonName) ||
+                 herbBotanicalName.includes(remedyHerb) ||
+                 remedyHerb.includes(herbBotanicalName);
+        });
+      });
+      
+      return matchedHerbs;
+    },
+    enabled: !!remedy?.herbs_used && remedy.herbs_used.length > 0,
+    initialData: [],
+  });
+
   if (remedyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -66,6 +96,22 @@ export default function RemedyProfile() {
       </div>
     );
   }
+
+  // Helper function to check if a herb name has a corresponding herb entity
+  const getHerbForName = (herbName) => {
+    if (!availableHerbs) return null;
+    
+    return availableHerbs.find(herb => {
+      const herbCommonName = herb.common_name.toLowerCase();
+      const herbBotanicalName = herb.botanical_name?.toLowerCase() || '';
+      const remedyHerb = herbName.toLowerCase();
+      
+      return herbCommonName.includes(remedyHerb) || 
+             remedyHerb.includes(herbCommonName) ||
+             herbBotanicalName.includes(remedyHerb) ||
+             remedyHerb.includes(herbBotanicalName);
+    });
+  };
 
   return (
     <div className="min-h-screen pb-12">
@@ -165,6 +211,60 @@ export default function RemedyProfile() {
           </div>
         </Card>
 
+        {/* Herbs Used in This Remedy - Now with Links */}
+        {remedy.herbs_used && remedy.herbs_used.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[#2D5016]">
+                <Leaf className="w-5 h-5" />
+                Herbs Used in This Remedy
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {remedy.herbs_used.map((herbName, index) => {
+                  const matchedHerb = getHerbForName(herbName);
+                  
+                  if (matchedHerb) {
+                    // Herb exists - show as clickable card
+                    return (
+                      <Link 
+                        key={index} 
+                        to={`${createPageUrl("HerbProfile")}?id=${matchedHerb.id}`}
+                        className="group"
+                      >
+                        <div className="p-4 border-2 rounded-lg hover:border-[#4A7C2E] hover:shadow-md transition-all duration-200 bg-white">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-[#2D5016] group-hover:text-[#4A7C2E]">
+                              {herbName}
+                            </h4>
+                            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#4A7C2E]" />
+                          </div>
+                          <p className="text-sm italic text-gray-600">{matchedHerb.botanical_name}</p>
+                          <p className="text-xs text-gray-500 mt-2 line-clamp-2">{matchedHerb.description}</p>
+                          <div className="mt-3">
+                            <span className="text-xs text-[#4A7C2E] font-medium group-hover:underline">
+                              View Herb Details →
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  } else {
+                    // Herb doesn't exist - show as simple badge
+                    return (
+                      <div key={index} className="p-4 border rounded-lg bg-gray-50">
+                        <h4 className="font-semibold text-gray-700">{herbName}</h4>
+                        <p className="text-xs text-gray-500 mt-1">Herb profile not yet available</p>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Detailed Information Tabs */}
         <Tabs defaultValue="preparation" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white border">
@@ -203,19 +303,6 @@ export default function RemedyProfile() {
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <h3 className="font-semibold mb-2">Duration of Use</h3>
                     <p className="text-gray-800">{remedy.duration_of_use}</p>
-                  </div>
-                )}
-
-                {remedy.herbs_used && remedy.herbs_used.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3">Herbs Used in This Remedy</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {remedy.herbs_used.map((herb, index) => (
-                        <Badge key={index} variant="outline" className="bg-[#4A7C2E]/5 text-[#2D5016]">
-                          {herb}
-                        </Badge>
-                      ))}
-                    </div>
                   </div>
                 )}
               </CardContent>
