@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -8,15 +8,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Leaf, AlertTriangle, BookOpen, 
-  Heart, Shield, Pill, ArrowLeft, ShoppingBag
+  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ProductCard from "../components/products/ProductCard";
+import AIPersonalizedRemedyInsight from "../components/remedies/AIPersonalizedRemedyInsight";
 
 export default function RemedyProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const remedyId = urlParams.get('id');
+  const [showAIInsight, setShowAIInsight] = useState(false);
 
   const { data: remedy, isLoading: remedyLoading } = useQuery({
     queryKey: ['remedy', remedyId],
@@ -148,9 +150,17 @@ export default function RemedyProfile() {
                 )}
               </div>
 
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed mb-6">
                 {remedy.description}
               </p>
+
+              <Button 
+                onClick={() => setShowAIInsight(true)}
+                className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Get Personalized AI Insight
+              </Button>
             </div>
           </div>
         </Card>
@@ -185,7 +195,7 @@ export default function RemedyProfile() {
                       <Pill className="w-5 h-5 text-blue-600" />
                       Recommended Dosage
                     </h3>
-                    <p className="text-gray-800">{remedy.dosage}</p>
+                    <p className="text-gray-800 whitespace-pre-line">{remedy.dosage}</p>
                   </div>
                 )}
 
@@ -373,6 +383,14 @@ export default function RemedyProfile() {
           </Card>
         )}
       </div>
+
+      {/* AI Personalized Insight Modal */}
+      {showAIInsight && (
+        <AIPersonalizedRemedyInsight 
+          remedy={remedy} 
+          onClose={() => setShowAIInsight(false)} 
+        />
+      )}
     </div>
   );
 }
