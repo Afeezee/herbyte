@@ -1,12 +1,14 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Package, Store, ExternalLink, ArrowLeft, 
-  MapPin, Phone, Mail, Globe, Beaker
+  MapPin, Phone, Mail, Globe, Beaker, Edit, Trash2, Shield
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,6 +16,21 @@ import { createPageUrl } from "@/utils";
 export default function ProductProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const productId = urlParams.get('id');
+  const [user, setUser] = useState(null);
+  const queryClient = useQueryClient();
+
+  // Fetch current user
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const { data: product, isLoading: productLoading } = useQuery({
     queryKey: ['product', productId],
@@ -42,6 +59,22 @@ export default function ProductProfile() {
     },
     enabled: !!product?.linked_remedy_id,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => base44.entities.Product.delete(productId),
+    onSuccess: () => {
+      alert("Product deleted successfully!");
+      window.location.href = createPageUrl("ExploreProducts");
+    },
+  });
+
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete "${product.product_name}"? This action cannot be undone.`)) {
+      deleteMutation.mutate();
+    }
+  };
+
+  const isAdmin = user?.role === "admin";
 
   if (productLoading) {
     return (
@@ -72,14 +105,50 @@ export default function ProductProfile() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] text-white py-8">
         <div className="max-w-7xl mx-auto px-6">
-          <Link to={createPageUrl("ExploreProducts")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Products
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link to={createPageUrl("ExploreProducts")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Products
+            </Link>
+
+            {isAdmin && (
+              <div className="flex gap-2 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  onClick={() => alert("Edit functionality - coming soon or implement modal")}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Product
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-6 -mt-8">
+        {/* Admin Badge */}
+        {isAdmin && (
+          <Alert className="mb-4 bg-blue-50 border-blue-200">
+            <Shield className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-900">
+              <strong>Admin Mode:</strong> You can edit or delete this product record.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Product Details - Left Column */}

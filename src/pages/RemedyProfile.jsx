@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Leaf, AlertTriangle, BookOpen, 
-  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles, ExternalLink
+  Heart, Shield, Pill, ArrowLeft, ShoppingBag, Sparkles, ExternalLink, Edit, Trash2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -19,6 +20,21 @@ export default function RemedyProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const remedyId = urlParams.get('id');
   const [showAIInsight, setShowAIInsight] = useState(false);
+  const [user, setUser] = useState(null); // Added user state
+  const queryClient = useQueryClient(); // Added queryClient initialization
+
+  // Fetch current user
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const { data: remedy, isLoading: remedyLoading } = useQuery({
     queryKey: ['remedy', remedyId],
@@ -73,6 +89,27 @@ export default function RemedyProfile() {
     initialData: [],
   });
 
+  // Added delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => base44.entities.Remedy.delete(remedyId),
+    onSuccess: () => {
+      alert("Remedy deleted successfully!");
+      window.location.href = createPageUrl("ExploreRemedies"); // Redirect after deletion
+    },
+    onError: (error) => {
+        alert(`Error deleting remedy: ${error.message}`);
+    }
+  });
+
+  // Added handleDelete function
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete "${remedy.name}"? This action cannot be undone.`)) {
+      deleteMutation.mutate();
+    }
+  };
+
+  const isAdmin = user?.role === "admin"; // Added isAdmin check
+
   if (remedyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -118,14 +155,51 @@ export default function RemedyProfile() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] text-white py-8">
         <div className="max-w-7xl mx-auto px-6">
-          <Link to={createPageUrl("ExploreRemedies")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Explore Remedies
-          </Link>
+          {/* Added admin buttons */}
+          <div className="flex items-center justify-between">
+            <Link to={createPageUrl("ExploreRemedies")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Explore Remedies
+            </Link>
+
+            {isAdmin && (
+              <div className="flex gap-2 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  onClick={() => alert("Edit functionality - coming soon or implement modal")}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Remedy
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-6 -mt-8">
+        {/* Admin Badge */}
+        {isAdmin && (
+          <Alert className="mb-4 bg-blue-50 border-blue-200">
+            <Shield className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-900">
+              <strong>Admin Mode:</strong> You can edit or delete this remedy record.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Main Content Card */}
         <Card className="overflow-hidden shadow-xl mb-8">
           <div className="grid md:grid-cols-3 gap-8">
