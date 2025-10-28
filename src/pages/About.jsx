@@ -254,7 +254,7 @@ export default function About() {
             Whether you're a healthcare professional, traditional medicine practitioner, or someone passionate about natural healing, we invite you to contribute to this growing knowledge base.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/submit-remedy">
+            <a href="/submitremedy">
               <button className="px-8 py-3 bg-white text-[#2D5016] rounded-lg font-semibold hover:bg-white/90 transition-colors">
                 Share Your Knowledge
               </button>
