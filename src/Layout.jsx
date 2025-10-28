@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -33,6 +34,11 @@ const navigationItems = [
     title: "Browse Herbs",
     url: createPageUrl("ExploreHerbs"),
     icon: Search,
+  },
+  {
+    title: "Shop Products",
+    url: createPageUrl("ExploreProducts"),
+    icon: BookOpen,
   },
   {
     title: "Submit Remedy",
