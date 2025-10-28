@@ -7,6 +7,8 @@ import Contact from './pages/Contact';
 import ExploreRemedies from './pages/ExploreRemedies';
 import RemedyProfile from './pages/RemedyProfile';
 import SellerDashboard from './pages/SellerDashboard';
+import ExploreProducts from './pages/ExploreProducts';
+import ProductProfile from './pages/ProductProfile';
 import Layout from './Layout.jsx';
 
 
@@ -20,6 +22,8 @@ export const PAGES = {
     "ExploreRemedies": ExploreRemedies,
     "RemedyProfile": RemedyProfile,
     "SellerDashboard": SellerDashboard,
+    "ExploreProducts": ExploreProducts,
+    "ProductProfile": ProductProfile,
 }
 
 export const pagesConfig = {

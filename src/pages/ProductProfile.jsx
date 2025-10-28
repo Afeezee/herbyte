@@ -1,0 +1,309 @@
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Package, Store, ExternalLink, ArrowLeft, 
+  MapPin, Phone, Mail, Globe, Beaker
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+
+export default function ProductProfile() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('id');
+
+  const { data: product, isLoading: productLoading } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: async () => {
+      const products = await base44.entities.Product.filter({ id: productId });
+      return products[0];
+    },
+    enabled: !!productId,
+  });
+
+  const { data: seller, isLoading: sellerLoading } = useQuery({
+    queryKey: ['seller', product?.seller_id],
+    queryFn: async () => {
+      const sellers = await base44.entities.SellerProfile.filter({ id: product.seller_id });
+      return sellers[0];
+    },
+    enabled: !!product?.seller_id,
+  });
+
+  const { data: remedy, isLoading: remedyLoading } = useQuery({
+    queryKey: ['remedy-for-product', product?.linked_remedy_id],
+    queryFn: async () => {
+      if (!product?.linked_remedy_id) return null;
+      const remedies = await base44.entities.Remedy.filter({ id: product.linked_remedy_id });
+      return remedies[0];
+    },
+    enabled: !!product?.linked_remedy_id,
+  });
+
+  if (productLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Package className="w-12 h-12 text-[#4A7C2E] animate-pulse mx-auto mb-4" />
+          <p className="text-gray-600">Loading product information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
+          <Link to={createPageUrl("ExploreProducts")}>
+            <Button>Back to Products</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-12">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] text-white py-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <Link to={createPageUrl("ExploreProducts")} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Products
+          </Link>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-6 -mt-8">
+        {/* Main Content */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Product Details - Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="overflow-hidden shadow-xl">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Image Gallery */}
+                <div className="bg-gray-100">
+                  {product.image_urls && product.image_urls.length > 0 ? (
+                    <img 
+                      src={product.image_urls[0]} 
+                      alt={product.product_name}
+                      className="w-full h-96 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-96 flex items-center justify-center">
+                      <Package className="w-24 h-24 text-gray-300" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Info */}
+                <div className="p-6">
+                  <Badge className="bg-[#4A7C2E] text-white mb-4">
+                    {product.product_type}
+                  </Badge>
+
+                  <h1 className="text-3xl font-bold text-[#2D5016] mb-2">
+                    {product.product_name}
+                  </h1>
+
+                  {product.size && (
+                    <p className="text-gray-600 mb-4">{product.size}</p>
+                  )}
+
+                  <div className="mb-6">
+                    <p className="text-4xl font-bold text-[#2D5016]">
+                      {product.currency} {product.price.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {product.linked_remedy_name && (
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="text-sm font-medium text-green-900 mb-1">
+                          <Beaker className="w-4 h-4 inline mr-1" />
+                          Remedy:
+                        </p>
+                        <Link 
+                          to={`${createPageUrl("RemedyProfile")}?id=${product.linked_remedy_id}`}
+                          className="text-[#4A7C2E] hover:underline font-medium"
+                        >
+                          {product.linked_remedy_name}
+                        </Link>
+                      </div>
+                    )}
+
+                    {product.purchase_url ? (
+                      <a 
+                        href={product.purchase_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6">
+                          <ExternalLink className="w-5 h-5 mr-2" />
+                          Buy Now
+                        </Button>
+                      </a>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        Contact seller for purchase information
+                      </p>
+                    )}
+
+                    {!product.availability && (
+                      <Badge className="bg-red-500 text-white w-full justify-center py-2">
+                        Currently Out of Stock
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <CardContent className="border-t p-6">
+                <h2 className="text-xl font-bold text-[#2D5016] mb-4">Description</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {product.description}
+                </p>
+
+                {product.linked_herbs && product.linked_herbs.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="font-semibold text-lg text-[#2D5016] mb-3">Herbs Used</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {product.linked_herbs.map((herb, index) => (
+                        <Badge key={index} variant="outline" className="bg-[#4A7C2E]/5 text-[#2D5016]">
+                          {herb}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Linked Remedy Card */}
+            {remedy && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[#2D5016]">
+                    <Beaker className="w-5 h-5" />
+                    About This Remedy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <h3 className="font-bold text-lg mb-2">{remedy.name}</h3>
+                  <p className="text-gray-600 mb-4 line-clamp-3">{remedy.description}</p>
+                  <Link to={`${createPageUrl("RemedyProfile")}?id=${remedy.id}`}>
+                    <Button variant="outline" className="w-full">
+                      View Full Remedy Details
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Seller Info - Right Column */}
+          <div className="space-y-6">
+            <Card className="shadow-xl sticky top-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-[#2D5016]">
+                  <Store className="w-5 h-5" />
+                  Seller Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {seller ? (
+                  <>
+                    {seller.logo_url && (
+                      <img 
+                        src={seller.logo_url} 
+                        alt={seller.business_name}
+                        className="w-24 h-24 object-cover rounded-lg"
+                      />
+                    )}
+
+                    <div>
+                      <h3 className="font-bold text-xl text-[#2D5016] mb-2">
+                        {seller.business_name}
+                      </h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        {seller.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 pt-4 border-t">
+                      {seller.location && (
+                        <div className="flex items-start gap-3">
+                          <MapPin className="w-4 h-4 text-gray-500 mt-1" />
+                          <span className="text-gray-700">{seller.location}</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-start gap-3">
+                        <Mail className="w-4 h-4 text-gray-500 mt-1" />
+                        <a 
+                          href={`mailto:${seller.contact_email}`}
+                          className="text-[#4A7C2E] hover:underline"
+                        >
+                          {seller.contact_email}
+                        </a>
+                      </div>
+
+                      {seller.phone_number && (
+                        <div className="flex items-start gap-3">
+                          <Phone className="w-4 h-4 text-gray-500 mt-1" />
+                          <a 
+                            href={`tel:${seller.phone_number}`}
+                            className="text-[#4A7C2E] hover:underline"
+                          >
+                            {seller.phone_number}
+                          </a>
+                        </div>
+                      )}
+
+                      {seller.website_url && (
+                        <div className="flex items-start gap-3">
+                          <Globe className="w-4 h-4 text-gray-500 mt-1" />
+                          <a 
+                            href={seller.website_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#4A7C2E] hover:underline break-all"
+                          >
+                            Visit Website
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {seller.certifications && seller.certifications.length > 0 && (
+                      <div className="pt-4 border-t">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Certifications</p>
+                        <div className="flex flex-wrap gap-2">
+                          {seller.certifications.map((cert, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {cert}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : sellerLoading ? (
+                  <p className="text-gray-500">Loading seller information...</p>
+                ) : (
+                  <p className="text-gray-500">Seller information not available</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
