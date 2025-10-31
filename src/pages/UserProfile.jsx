@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { 
   User, MessageCircle, Leaf, Beaker, Package, Shield, 
-  Calendar, Mail, ExternalLink, Store
+  Calendar, Mail, ExternalLink, Store, Edit, Trash2, Heart, TrendingUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -17,6 +17,7 @@ import { format } from "date-fns";
 export default function UserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // Fetch current user
   React.useEffect(() => {
@@ -89,6 +90,60 @@ export default function UserProfile() {
     initialData: [],
   });
 
+  // Fetch user's wishlist for stats
+  const { data: wishlistItems } = useQuery({
+    queryKey: ['user-wishlist-stats', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return [];
+      return await base44.entities.Wishlist.filter({ user_email: user.email });
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  // Delete mutations
+  const deleteHerbMutation = useMutation({
+    mutationFn: (id) => base44.entities.Herb.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-herbs'] });
+      alert("Herb deleted successfully!");
+    },
+  });
+
+  const deleteRemedyMutation = useMutation({
+    mutationFn: (id) => base44.entities.Remedy.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-remedies'] });
+      alert("Remedy deleted successfully!");
+    },
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: (id) => base44.entities.Product.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-products'] });
+      alert("Product deleted successfully!");
+    },
+  });
+
+  const handleDeleteHerb = (id, name) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      deleteHerbMutation.mutate(id);
+    }
+  };
+
+  const handleDeleteRemedy = (id, name) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      deleteRemedyMutation.mutate(id);
+    }
+  };
+
+  const handleDeleteProduct = (id, name) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      deleteProductMutation.mutate(id);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -117,6 +172,8 @@ export default function UserProfile() {
   }
 
   const totalContributions = comments.length + herbs.length + remedies.length + products.length;
+  const totalReplies = comments.filter(c => c.parent_comment_id).length;
+  const totalParentComments = comments.filter(c => !c.parent_comment_id).length;
 
   return (
     <div className="min-h-screen py-12">
@@ -160,6 +217,41 @@ export default function UserProfile() {
           </CardContent>
         </Card>
 
+        {/* Stats Cards */}
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <MessageCircle className="w-8 h-8 text-[#4A7C2E] mx-auto mb-2" />
+              <div className="text-3xl font-bold text-gray-900">{totalParentComments}</div>
+              <p className="text-sm text-gray-600">Comments</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 text-center">
+              <TrendingUp className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-gray-900">{totalReplies}</div>
+              <p className="text-sm text-gray-600">Replies</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Heart className="w-8 h-8 text-red-500 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-gray-900">{wishlistItems.length}</div>
+              <p className="text-sm text-gray-600">Saved Items</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Leaf className="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-gray-900">{herbs.length + remedies.length}</div>
+              <p className="text-sm text-gray-600">Knowledge Shared</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Tabs */}
         <Tabs defaultValue="comments" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-white border">
@@ -187,7 +279,7 @@ export default function UserProfile() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[#2D5016]">
                   <MessageCircle className="w-5 h-5" />
-                  Your Comments
+                  Your Comments & Replies
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -202,13 +294,18 @@ export default function UserProfile() {
                             <Badge variant="outline" className="bg-[#4A7C2E]/5 text-[#2D5016]">
                               {comment.entity_type}
                             </Badge>
+                            {comment.parent_comment_id && (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                Reply
+                              </Badge>
+                            )}
                             <span className="text-sm text-gray-500">
                               {format(new Date(comment.created_date), 'MMM d, yyyy')}
                             </span>
                           </div>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">
-                          Commented on: <span className="font-medium text-[#2D5016]">{comment.entity_name}</span>
+                          {comment.parent_comment_id ? "Replied on" : "Commented on"}: <span className="font-medium text-[#2D5016]">{comment.entity_name}</span>
                         </p>
                         <p className="text-gray-700 leading-relaxed">{comment.content}</p>
                       </div>
@@ -238,16 +335,28 @@ export default function UserProfile() {
                 ) : herbs.length > 0 ? (
                   <div className="grid md:grid-cols-2 gap-4">
                     {herbs.map((herb) => (
-                      <Link 
-                        key={herb.id}
-                        to={`${createPageUrl("HerbProfile")}?id=${herb.id}`}
-                        className="border rounded-lg p-4 hover:shadow-md transition-all group"
-                      >
+                      <div key={herb.id} className="border rounded-lg p-4 hover:shadow-md transition-all group">
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="font-semibold text-[#2D5016] group-hover:text-[#4A7C2E]">
-                            {herb.common_name}
-                          </h3>
-                          <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#4A7C2E]" />
+                          <Link to={`${createPageUrl("HerbProfile")}?id=${herb.id}`} className="flex-1">
+                            <h3 className="font-semibold text-[#2D5016] group-hover:text-[#4A7C2E]">
+                              {herb.common_name}
+                            </h3>
+                          </Link>
+                          <div className="flex gap-1">
+                            <Link to={`${createPageUrl("HerbProfile")}?id=${herb.id}`}>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#4A7C2E]" />
+                              </Button>
+                            </Link>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDeleteHerb(herb.id, herb.common_name)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                         <p className="text-sm italic text-gray-600 mb-2">{herb.botanical_name}</p>
                         <p className="text-xs text-gray-500 line-clamp-2">{herb.description}</p>
@@ -257,7 +366,7 @@ export default function UserProfile() {
                             {format(new Date(herb.created_date), 'MMM d, yyyy')}
                           </span>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -290,16 +399,28 @@ export default function UserProfile() {
                 ) : remedies.length > 0 ? (
                   <div className="grid md:grid-cols-2 gap-4">
                     {remedies.map((remedy) => (
-                      <Link 
-                        key={remedy.id}
-                        to={`${createPageUrl("RemedyProfile")}?id=${remedy.id}`}
-                        className="border rounded-lg p-4 hover:shadow-md transition-all group"
-                      >
+                      <div key={remedy.id} className="border rounded-lg p-4 hover:shadow-md transition-all group">
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="font-semibold text-[#2D5016] group-hover:text-[#4A7C2E]">
-                            {remedy.name}
-                          </h3>
-                          <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#4A7C2E]" />
+                          <Link to={`${createPageUrl("RemedyProfile")}?id=${remedy.id}`} className="flex-1">
+                            <h3 className="font-semibold text-[#2D5016] group-hover:text-[#4A7C2E]">
+                              {remedy.name}
+                            </h3>
+                          </Link>
+                          <div className="flex gap-1">
+                            <Link to={`${createPageUrl("RemedyProfile")}?id=${remedy.id}`}>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#4A7C2E]" />
+                              </Button>
+                            </Link>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDeleteRemedy(remedy.id, remedy.name)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">For: {remedy.health_condition}</p>
                         <p className="text-xs text-gray-500 line-clamp-2">{remedy.description}</p>
@@ -309,7 +430,7 @@ export default function UserProfile() {
                             {format(new Date(remedy.created_date), 'MMM d, yyyy')}
                           </span>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -342,12 +463,8 @@ export default function UserProfile() {
                 ) : products.length > 0 ? (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {products.map((product) => (
-                      <Link 
-                        key={product.id}
-                        to={`${createPageUrl("ProductProfile")}?id=${product.id}`}
-                        className="border rounded-lg overflow-hidden hover:shadow-md transition-all group"
-                      >
-                        <div className="h-32 bg-gray-100">
+                      <div key={product.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-all group">
+                        <div className="h-32 bg-gray-100 relative">
                           {product.image_urls && product.image_urls.length > 0 ? (
                             <img src={product.image_urls[0]} alt={product.product_name} className="w-full h-full object-cover" />
                           ) : (
@@ -355,6 +472,21 @@ export default function UserProfile() {
                               <Package className="w-12 h-12 text-gray-300" />
                             </div>
                           )}
+                          <div className="absolute top-2 right-2 flex gap-1">
+                            <Link to={`${createPageUrl("ProductProfile")}?id=${product.id}`}>
+                              <Button variant="secondary" size="sm" className="h-7 w-7 p-0">
+                                <ExternalLink className="w-3 h-3" />
+                              </Button>
+                            </Link>
+                            <Button 
+                              variant="secondary"
+                              size="sm"
+                              className="h-7 w-7 p-0 bg-red-500 hover:bg-red-600 text-white"
+                              onClick={() => handleDeleteProduct(product.id, product.product_name)}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="p-4">
                           <h3 className="font-semibold text-[#2D5016] group-hover:text-[#4A7C2E] mb-2">
@@ -376,7 +508,7 @@ export default function UserProfile() {
                             </span>
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (
