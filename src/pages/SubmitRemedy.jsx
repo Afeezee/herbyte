@@ -9,10 +9,56 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X, Beaker, Leaf } from "lucide-react";
+import { Send, Loader2, CheckCircle, AlertTriangle, Info, Upload, X, Beaker, Leaf, User as UserIcon } from "lucide-react";
 
 export default function SubmitRemedy() {
   const [activeTab, setActiveTab] = useState("remedy");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch current user
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("User not logged in");
+      }
+      setLoading(false);
+    };
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <UserIcon className="w-12 h-12 text-[#4A7C2E] mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
+            <p className="text-gray-600 mb-6">
+              You need to be signed in to contribute knowledge and submit remedies or herbs to the Herbyte community.
+            </p>
+            <Button 
+              onClick={() => base44.auth.redirectToLogin(window.location.href)}
+              className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+            >
+              Sign In to Continue
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12">
