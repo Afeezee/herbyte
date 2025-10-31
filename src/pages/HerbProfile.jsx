@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import AIPersonalizedInsight from "../components/herbs/AIPersonalizedInsight";
 import CommentSection from "../components/shared/CommentSection";
+import WishlistButton from "../components/shared/WishlistButton"; // Added import
 
 export default function HerbProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -228,13 +229,27 @@ export default function HerbProfile() {
                 {herb.description}
               </p>
 
-              <Button 
-                onClick={() => setShowAIInsight(true)}
-                className="bg-[#4A7C2E] hover:bg-[#2D5016]"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Get Personalized AI Insight
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => setShowAIInsight(true)}
+                  className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Get Personalized AI Insight
+                </Button>
+
+                <WishlistButton
+                  entityType="Herb"
+                  entityId={herbId}
+                  entityName={herb.common_name}
+                  entityImageUrl={herb.image_url}
+                  entityMetadata={{
+                    botanical_name: herb.botanical_name,
+                    category: herb.category,
+                    region: herb.region
+                  }}
+                />
+              </div>
             </div>
           </div>
         </Card>

@@ -10,6 +10,7 @@ import SellerDashboard from './pages/SellerDashboard';
 import ExploreProducts from './pages/ExploreProducts';
 import ProductProfile from './pages/ProductProfile';
 import UserProfile from './pages/UserProfile';
+import Wishlist from './pages/Wishlist';
 import Layout from './Layout.jsx';
 
 
@@ -26,6 +27,7 @@ export const PAGES = {
     "ExploreProducts": ExploreProducts,
     "ProductProfile": ProductProfile,
     "UserProfile": UserProfile,
+    "Wishlist": Wishlist,
 }
 
 export const pagesConfig = {
