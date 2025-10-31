@@ -1,8 +1,7 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker, Store, User, Heart } from "lucide-react";
+import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker, Store, User, Heart, Calendar } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +38,11 @@ const navigationItems = [
     title: "Shop Products",
     url: createPageUrl("ExploreProducts"),
     icon: BookOpen,
+  },
+  {
+    title: "Events",
+    url: createPageUrl("Events"),
+    icon: Calendar,
   },
   {
     title: "Become a Seller",
@@ -201,12 +205,10 @@ export default function Layout({ children, currentPageName }) {
         )}
       </header>
 
-      {/* Main Content */}
       <main className="min-h-[calc(100vh-200px)]">
         {children}
       </main>
 
-      {/* Floating AI Assistant Button */}
       <button
         onClick={() => setShowAIAssistant(true)}
         className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-br from-[#4A7C2E] to-[#2D5016] text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
@@ -216,12 +218,10 @@ export default function Layout({ children, currentPageName }) {
         <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></span>
       </button>
 
-      {/* AI Assistant Modal */}
       {showAIAssistant && (
         <AIAssistant onClose={() => setShowAIAssistant(false)} />
       )}
 
-      {/* Footer */}
       <footer className="bg-[#2D5016] text-white mt-20">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-4 gap-8">
