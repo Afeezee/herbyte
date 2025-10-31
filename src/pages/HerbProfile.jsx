@@ -14,6 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import AIPersonalizedInsight from "../components/herbs/AIPersonalizedInsight";
+import CommentSection from "../components/shared/CommentSection";
 
 export default function HerbProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -459,6 +460,13 @@ export default function HerbProfile() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Comment Section - NEW */}
+        <CommentSection 
+          entityType="Herb"
+          entityId={herbId}
+          entityName={herb.common_name}
+        />
       </div>
 
       {/* AI Personalized Insight Modal */}
