@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -13,7 +12,7 @@ import {
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CommentSection from "../components/shared/CommentSection";
-import WishlistButton from "../components/shared/WishlistButton"; // Added import
+import WishlistButton from "../components/shared/WishlistButton";
 
 export default function ProductProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -21,7 +20,6 @@ export default function ProductProfile() {
   const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
 
-  // Fetch current user
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -104,7 +102,6 @@ export default function ProductProfile() {
 
   return (
     <div className="min-h-screen pb-12">
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#2D5016] to-[#4A7C2E] text-white py-8">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between">
@@ -141,7 +138,6 @@ export default function ProductProfile() {
       </section>
 
       <div className="max-w-7xl mx-auto px-6 -mt-8">
-        {/* Admin Badge */}
         {isAdmin && (
           <Alert className="mb-4 bg-blue-50 border-blue-200">
             <Shield className="h-4 w-4 text-blue-600" />
@@ -151,13 +147,10 @@ export default function ProductProfile() {
           </Alert>
         )}
 
-        {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Product Details - Left Column */}
           <div className="lg:col-span-2 space-y-6">
             <Card className="overflow-hidden shadow-xl">
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Image Gallery */}
                 <div className="bg-gray-100">
                   {product.image_urls && product.image_urls.length > 0 ? (
                     <img 
@@ -172,7 +165,6 @@ export default function ProductProfile() {
                   )}
                 </div>
 
-                {/* Product Info */}
                 <div className="p-6">
                   <Badge className="bg-[#4A7C2E] text-white mb-4">
                     {product.product_type}
@@ -208,13 +200,13 @@ export default function ProductProfile() {
                       </div>
                     )}
 
-                    <div className="flex gap-2"> {/* Added flex container for alignment */}
+                    <div className="space-y-2">
                       {product.purchase_url ? (
                         <a 
                           href={product.purchase_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1" {/* Added flex-1 for fill space */}
+                          className="block"
                         >
                           <Button className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6">
                             <ExternalLink className="w-5 h-5 mr-2" />
@@ -222,31 +214,31 @@ export default function ProductProfile() {
                           </Button>
                         </a>
                       ) : (
-                        <p className="text-sm text-gray-500 text-center py-4 flex-1">
+                        <p className="text-sm text-gray-500 text-center py-4">
                           Contact seller for purchase information
                         </p>
                       )}
+
+                      <WishlistButton
+                        entityType="Product"
+                        entityId={productId}
+                        entityName={product.product_name}
+                        entityImageUrl={product.image_urls?.[0]}
+                        entityMetadata={{
+                          price: product.price,
+                          currency: product.currency,
+                          product_type: product.product_type,
+                          seller_business_name: product.seller_business_name
+                        }}
+                        size="lg"
+                      />
+
+                      {!product.availability && (
+                        <Badge className="bg-red-500 text-white w-full justify-center py-2">
+                          Currently Out of Stock
+                        </Badge>
+                      )}
                     </div>
-
-                    <WishlistButton // Added WishlistButton component
-                      entityType="Product"
-                      entityId={productId}
-                      entityName={product.product_name}
-                      entityImageUrl={product.image_urls?.[0]}
-                      entityMetadata={{
-                        price: product.price,
-                        currency: product.currency,
-                        product_type: product.product_type,
-                        seller_business_name: seller?.business_name // Use seller.business_name if available
-                      }}
-                      size="lg"
-                    />
-
-                    {!product.availability && (
-                      <Badge className="bg-red-500 text-white w-full justify-center py-2">
-                        Currently Out of Stock
-                      </Badge>
-                    )}
                   </div>
                 </div>
               </div>
@@ -272,7 +264,6 @@ export default function ProductProfile() {
               </CardContent>
             </Card>
 
-            {/* Linked Remedy Card */}
             {remedy && (
               <Card>
                 <CardHeader>
@@ -294,7 +285,6 @@ export default function ProductProfile() {
             )}
           </div>
 
-          {/* Seller Info - Right Column */}
           <div className="space-y-6">
             <Card className="shadow-xl sticky top-6">
               <CardHeader>
@@ -391,14 +381,11 @@ export default function ProductProfile() {
           </div>
         </div>
 
-        {/* Comment Section - NEW */}
-        {product && ( // Ensure product data is loaded before rendering CommentSection
-          <CommentSection 
-            entityType="Product"
-            entityId={productId}
-            entityName={product.product_name}
-          />
-        )}
+        <CommentSection 
+          entityType="Product"
+          entityId={productId}
+          entityName={product.product_name}
+        />
       </div>
     </div>
   );
