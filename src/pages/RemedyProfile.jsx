@@ -16,6 +16,7 @@ import { createPageUrl } from "@/utils";
 import ProductCard from "../components/products/ProductCard";
 import AIPersonalizedRemedyInsight from "../components/remedies/AIPersonalizedRemedyInsight";
 import CommentSection from "../components/shared/CommentSection";
+import WishlistButton from "../components/shared/WishlistButton"; // Added import
 
 export default function RemedyProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -199,7 +200,7 @@ export default function RemedyProfile() {
           <Alert className="mb-4 bg-green-50 border-green-200">
             <User className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-900">
-              <strong>Community Contribution:</strong> This remedy was submitted by a community member.
+              <strong>Community Contribution:</strong> Submitted by {remedy.submitted_by}
             </AlertDescription>
           </Alert>
         )}
@@ -284,13 +285,28 @@ export default function RemedyProfile() {
                 {remedy.description}
               </p>
 
-              <Button 
-                onClick={() => setShowAIInsight(true)}
-                className="bg-[#4A7C2E] hover:bg-[#2D5016]"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Get Personalized AI Insight
-              </Button>
+              <div className="flex flex-wrap gap-3"> {/* Changed to flex-wrap to accommodate buttons */}
+                <Button 
+                  onClick={() => setShowAIInsight(true)}
+                  className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Get Personalized AI Insight
+                </Button>
+
+                {/* Wishlist Button Added */}
+                <WishlistButton
+                  entityType="Remedy"
+                  entityId={remedyId}
+                  entityName={remedy.name}
+                  entityImageUrl={remedy.image_url}
+                  entityMetadata={{
+                    health_condition: remedy.health_condition,
+                    primary_herb_name: remedy.primary_herb_name,
+                    category: remedy.category
+                  }}
+                />
+              </div>
             </div>
           </div>
         </Card>

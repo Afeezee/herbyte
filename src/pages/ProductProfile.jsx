@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CommentSection from "../components/shared/CommentSection";
+import WishlistButton from "../components/shared/WishlistButton"; // Added import
 
 export default function ProductProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -207,23 +208,39 @@ export default function ProductProfile() {
                       </div>
                     )}
 
-                    {product.purchase_url ? (
-                      <a 
-                        href={product.purchase_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        <Button className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6">
-                          <ExternalLink className="w-5 h-5 mr-2" />
-                          Buy Now
-                        </Button>
-                      </a>
-                    ) : (
-                      <p className="text-sm text-gray-500 text-center py-4">
-                        Contact seller for purchase information
-                      </p>
-                    )}
+                    <div className="flex gap-2"> {/* Added flex container for alignment */}
+                      {product.purchase_url ? (
+                        <a 
+                          href={product.purchase_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1" {/* Added flex-1 for fill space */}
+                        >
+                          <Button className="w-full bg-[#4A7C2E] hover:bg-[#2D5016] text-lg py-6">
+                            <ExternalLink className="w-5 h-5 mr-2" />
+                            Buy Now
+                          </Button>
+                        </a>
+                      ) : (
+                        <p className="text-sm text-gray-500 text-center py-4 flex-1">
+                          Contact seller for purchase information
+                        </p>
+                      )}
+                    </div>
+
+                    <WishlistButton // Added WishlistButton component
+                      entityType="Product"
+                      entityId={productId}
+                      entityName={product.product_name}
+                      entityImageUrl={product.image_urls?.[0]}
+                      entityMetadata={{
+                        price: product.price,
+                        currency: product.currency,
+                        product_type: product.product_type,
+                        seller_business_name: seller?.business_name // Use seller.business_name if available
+                      }}
+                      size="lg"
+                    />
 
                     {!product.availability && (
                       <Badge className="bg-red-500 text-white w-full justify-center py-2">

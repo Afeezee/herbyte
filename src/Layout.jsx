@@ -2,7 +2,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker, Store, User } from "lucide-react";
+import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker, Store, User, Heart } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -49,6 +49,11 @@ const navigationItems = [
     title: "Submit Remedy",
     url: createPageUrl("SubmitRemedy"),
     icon: Send,
+  },
+  {
+    title: "My Wishlist",
+    url: createPageUrl("Wishlist"),
+    icon: Heart,
   },
   {
     title: "My Profile",
