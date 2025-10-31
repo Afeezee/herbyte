@@ -9,6 +9,7 @@ import RemedyProfile from './pages/RemedyProfile';
 import SellerDashboard from './pages/SellerDashboard';
 import ExploreProducts from './pages/ExploreProducts';
 import ProductProfile from './pages/ProductProfile';
+import UserProfile from './pages/UserProfile';
 import Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "SellerDashboard": SellerDashboard,
     "ExploreProducts": ExploreProducts,
     "ProductProfile": ProductProfile,
+    "UserProfile": UserProfile,
 }
 
 export const pagesConfig = {
