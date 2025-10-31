@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import CommentSection from "../components/shared/CommentSection";
 
 export default function ProductProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -372,6 +373,15 @@ export default function ProductProfile() {
             </Card>
           </div>
         </div>
+
+        {/* Comment Section - NEW */}
+        {product && ( // Ensure product data is loaded before rendering CommentSection
+          <CommentSection 
+            entityType="Product"
+            entityId={productId}
+            entityName={product.product_name}
+          />
+        )}
       </div>
     </div>
   );

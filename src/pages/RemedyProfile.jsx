@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ProductCard from "../components/products/ProductCard";
 import AIPersonalizedRemedyInsight from "../components/remedies/AIPersonalizedRemedyInsight";
+import CommentSection from "../components/shared/CommentSection";
 
 export default function RemedyProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -552,6 +553,13 @@ export default function RemedyProfile() {
             </CardContent>
           </Card>
         )}
+
+        {/* Comment Section - NEW */}
+        <CommentSection 
+          entityType="Remedy"
+          entityId={remedyId}
+          entityName={remedy.name}
+        />
       </div>
 
       {/* AI Personalized Insight Modal */}
