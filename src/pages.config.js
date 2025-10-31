@@ -12,6 +12,8 @@ import ProductProfile from './pages/ProductProfile';
 import UserProfile from './pages/UserProfile';
 import Wishlist from './pages/Wishlist';
 import Events from './pages/Events';
+import EventProfile from './pages/EventProfile';
+import OrganizeEvent from './pages/OrganizeEvent';
 import Layout from './Layout.jsx';
 
 
@@ -30,6 +32,8 @@ export const PAGES = {
     "UserProfile": UserProfile,
     "Wishlist": Wishlist,
     "Events": Events,
+    "EventProfile": EventProfile,
+    "OrganizeEvent": OrganizeEvent,
 }
 
 export const pagesConfig = {
