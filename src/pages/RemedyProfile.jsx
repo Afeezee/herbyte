@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -16,14 +15,17 @@ import { createPageUrl } from "@/utils";
 import ProductCard from "../components/products/ProductCard";
 import AIPersonalizedRemedyInsight from "../components/remedies/AIPersonalizedRemedyInsight";
 import CommentSection from "../components/shared/CommentSection";
-import WishlistButton from "../components/shared/WishlistButton"; // Added import
+import WishlistButton from "../components/shared/WishlistButton";
+import ShareButtons from "../components/shared/ShareButtons";
+import EditRemedyModal from "../components/shared/EditRemedyModal";
 
 export default function RemedyProfile() {
   const urlParams = new URLSearchParams(window.location.search);
-  const remedyId = urlParams.get('id');
-  const [showAIInsight, setShowAIInsight] = useState(false);
-  const [user, setUser] = useState(null);
-  const queryClient = useQueryClient();
+      const remedyId = urlParams.get('id');
+      const [showAIInsight, setShowAIInsight] = useState(false);
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [user, setUser] = useState(null);
+      const queryClient = useQueryClient();
 
   // Fetch current user
   React.useEffect(() => {
@@ -106,6 +108,8 @@ export default function RemedyProfile() {
   };
 
   const isAdmin = user?.role === "admin";
+    const isCreator = user?.email === remedy?.created_by;
+    const canEdit = isAdmin || isCreator;
 
   if (remedyLoading) {
     return (
@@ -157,43 +161,43 @@ export default function RemedyProfile() {
               Back to Explore Remedies
             </Link>
 
-            {isAdmin && (
-              <div className="flex gap-2 mb-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => alert("Edit functionality - coming soon or implement modal")}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Remedy
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
-                  onClick={handleDelete}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            )}
+            {canEdit && (
+                                <div className="flex gap-2 mb-6">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                    onClick={() => setShowEditModal(true)}
+                                  >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Edit Remedy
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
+                                    onClick={handleDelete}
+                                    disabled={deleteMutation.isPending}
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              )}
           </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-6 -mt-8">
-        {/* Admin Badge */}
-        {isAdmin && (
-          <Alert className="mb-4 bg-blue-50 border-blue-200">
-            <Shield className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-900">
-              <strong>Admin Mode:</strong> You can edit or delete this remedy record.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Edit Permission Badge */}
+                      {canEdit && (
+                        <Alert className="mb-4 bg-blue-50 border-blue-200">
+                          <Shield className="h-4 w-4 text-blue-600" />
+                          <AlertDescription className="text-blue-900">
+                            <strong>{isAdmin ? "Admin Mode" : "Creator Mode"}:</strong> You can edit or delete this remedy record.
+                          </AlertDescription>
+                        </Alert>
+                      )}
 
         {/* Contributor Badge */}
         {remedy.submitted_by && (
@@ -285,28 +289,34 @@ export default function RemedyProfile() {
                 {remedy.description}
               </p>
 
-              <div className="flex flex-wrap gap-3"> {/* Changed to flex-wrap to accommodate buttons */}
-                <Button 
-                  onClick={() => setShowAIInsight(true)}
-                  className="bg-[#4A7C2E] hover:bg-[#2D5016]"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get Personalized AI Insight
-                </Button>
+              <div className="flex flex-wrap gap-3">
+                                    <Button 
+                                      onClick={() => setShowAIInsight(true)}
+                                      className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+                                    >
+                                      <Sparkles className="w-4 h-4 mr-2" />
+                                      Get Personalized AI Insight
+                                    </Button>
 
-                {/* Wishlist Button Added */}
-                <WishlistButton
-                  entityType="Remedy"
-                  entityId={remedyId}
-                  entityName={remedy.name}
-                  entityImageUrl={remedy.image_url}
-                  entityMetadata={{
-                    health_condition: remedy.health_condition,
-                    primary_herb_name: remedy.primary_herb_name,
-                    category: remedy.category
-                  }}
-                />
-              </div>
+                                    <WishlistButton
+                                      entityType="Remedy"
+                                      entityId={remedyId}
+                                      entityName={remedy.name}
+                                      entityImageUrl={remedy.image_url}
+                                      entityMetadata={{
+                                        health_condition: remedy.health_condition,
+                                        primary_herb_name: remedy.primary_herb_name,
+                                        category: remedy.category
+                                      }}
+                                    />
+
+                                    <ShareButtons
+                                      title={remedy.name}
+                                      description={remedy.description}
+                                      imageUrl={remedy.image_url}
+                                      entityType="remedy"
+                                    />
+                                  </div>
             </div>
           </div>
         </Card>
@@ -579,12 +589,20 @@ export default function RemedyProfile() {
       </div>
 
       {/* AI Personalized Insight Modal */}
-      {showAIInsight && (
-        <AIPersonalizedRemedyInsight 
-          remedy={remedy} 
-          onClose={() => setShowAIInsight(false)} 
-        />
-      )}
-    </div>
-  );
-}
+                  {showAIInsight && (
+                    <AIPersonalizedRemedyInsight 
+                      remedy={remedy} 
+                      onClose={() => setShowAIInsight(false)} 
+                    />
+                  )}
+
+                  {/* Edit Remedy Modal */}
+                  {showEditModal && (
+                    <EditRemedyModal
+                      remedy={remedy}
+                      onClose={() => setShowEditModal(false)}
+                    />
+                  )}
+                </div>
+              );
+            }
