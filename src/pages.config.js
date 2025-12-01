@@ -14,7 +14,8 @@ import Wishlist from './pages/Wishlist';
 import Events from './pages/Events';
 import EventProfile from './pages/EventProfile';
 import OrganizeEvent from './pages/OrganizeEvent';
-import Layout from './Layout.jsx';
+import AdminDashboard from './pages/AdminDashboard';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -34,10 +35,11 @@ export const PAGES = {
     "Events": Events,
     "EventProfile": EventProfile,
     "OrganizeEvent": OrganizeEvent,
+    "AdminDashboard": AdminDashboard,
 }
 
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };
