@@ -14,6 +14,7 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import CommentSection from "../components/shared/CommentSection";
 import WishlistButton from "../components/shared/WishlistButton";
+import ShareButtons from "../components/shared/ShareButtons";
 
 export default function EventProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -320,6 +321,13 @@ export default function EventProfile() {
                       is_free: event.is_free
                     }}
                     size="lg"
+                  />
+
+                  <ShareButtons
+                    title={event.title}
+                    description={event.description}
+                    imageUrl={event.image_url}
+                    entityType="event"
                   />
                 </div>
               </CardContent>

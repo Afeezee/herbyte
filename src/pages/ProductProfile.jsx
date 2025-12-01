@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CommentSection from "../components/shared/CommentSection";
 import WishlistButton from "../components/shared/WishlistButton";
+import ShareButtons from "../components/shared/ShareButtons";
 
 export default function ProductProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -75,6 +76,8 @@ export default function ProductProfile() {
   };
 
   const isAdmin = user?.role === "admin";
+  const isSeller = user?.seller_profile_id === product?.seller_id;
+  const canEdit = isAdmin || isSeller;
 
   if (productLoading) {
     return (
@@ -110,13 +113,13 @@ export default function ProductProfile() {
               Back to Products
             </Link>
 
-            {isAdmin && (
+            {canEdit && (
               <div className="flex gap-2 mb-6">
                 <Button
                   variant="outline"
                   size="sm"
                   className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => alert("Edit functionality - coming soon or implement modal")}
+                  onClick={() => alert("Edit functionality - coming soon")}
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Product
@@ -138,11 +141,11 @@ export default function ProductProfile() {
       </section>
 
       <div className="max-w-7xl mx-auto px-6 -mt-8">
-        {isAdmin && (
+        {canEdit && (
           <Alert className="mb-4 bg-blue-50 border-blue-200">
             <Shield className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-900">
-              <strong>Admin Mode:</strong> You can edit or delete this product record.
+              <strong>{isAdmin ? "Admin Mode" : "Seller Mode"}:</strong> You can edit or delete this product.
             </AlertDescription>
           </Alert>
         )}
@@ -231,6 +234,13 @@ export default function ProductProfile() {
                           seller_business_name: product.seller_business_name
                         }}
                         size="lg"
+                      />
+
+                      <ShareButtons
+                        title={product.product_name}
+                        description={product.description}
+                        imageUrl={product.image_urls?.[0]}
+                        entityType="product"
                       />
 
                       {!product.availability && (
