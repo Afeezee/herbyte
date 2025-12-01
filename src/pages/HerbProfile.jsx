@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -15,12 +14,15 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import AIPersonalizedInsight from "../components/herbs/AIPersonalizedInsight";
 import CommentSection from "../components/shared/CommentSection";
-import WishlistButton from "../components/shared/WishlistButton"; // Added import
+import WishlistButton from "../components/shared/WishlistButton";
+import ShareButtons from "../components/shared/ShareButtons";
+import EditHerbModal from "../components/shared/EditHerbModal";
 
 export default function HerbProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const herbId = urlParams.get('id');
   const [showAIInsight, setShowAIInsight] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
 
@@ -65,6 +67,8 @@ export default function HerbProfile() {
   };
 
   const isAdmin = user?.role === "admin";
+  const isCreator = user?.email === herb?.created_by;
+  const canEdit = isAdmin || isCreator;
 
   if (isLoading) {
     return (
@@ -102,43 +106,43 @@ export default function HerbProfile() {
               Back to Explore
             </Link>
             
-            {isAdmin && (
-              <div className="flex gap-2 mb-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => alert("Edit functionality - coming soon or implement modal")}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Herb
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
-                  onClick={handleDelete}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            )}
+            {canEdit && (
+                                <div className="flex gap-2 mb-6">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                    onClick={() => setShowEditModal(true)}
+                                  >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Edit Herb
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-red-500/20 border-red-300 text-white hover:bg-red-500/30"
+                                    onClick={handleDelete}
+                                    disabled={deleteMutation.isPending}
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              )}
           </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-6 -mt-8">
-        {/* Admin Badge - Added conditional rendering */}
-        {isAdmin && (
-          <Alert className="mb-4 bg-blue-50 border-blue-200">
-            <Shield className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-900">
-              <strong>Admin Mode:</strong> You can edit or delete this herb record.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Edit Permission Badge */}
+                      {canEdit && (
+                        <Alert className="mb-4 bg-blue-50 border-blue-200">
+                          <Shield className="h-4 w-4 text-blue-600" />
+                          <AlertDescription className="text-blue-900">
+                            <strong>{isAdmin ? "Admin Mode" : "Creator Mode"}:</strong> You can edit or delete this herb record.
+                          </AlertDescription>
+                        </Alert>
+                      )}
 
         {/* Contributor Badge */}
         {herb.submitted_by && herb.community_contributed && (
@@ -230,26 +234,33 @@ export default function HerbProfile() {
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Button 
-                  onClick={() => setShowAIInsight(true)}
-                  className="bg-[#4A7C2E] hover:bg-[#2D5016]"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get Personalized AI Insight
-                </Button>
+                                    <Button 
+                                      onClick={() => setShowAIInsight(true)}
+                                      className="bg-[#4A7C2E] hover:bg-[#2D5016]"
+                                    >
+                                      <Sparkles className="w-4 h-4 mr-2" />
+                                      Get Personalized AI Insight
+                                    </Button>
 
-                <WishlistButton
-                  entityType="Herb"
-                  entityId={herbId}
-                  entityName={herb.common_name}
-                  entityImageUrl={herb.image_url}
-                  entityMetadata={{
-                    botanical_name: herb.botanical_name,
-                    category: herb.category,
-                    region: herb.region
-                  }}
-                />
-              </div>
+                                    <WishlistButton
+                                      entityType="Herb"
+                                      entityId={herbId}
+                                      entityName={herb.common_name}
+                                      entityImageUrl={herb.image_url}
+                                      entityMetadata={{
+                                        botanical_name: herb.botanical_name,
+                                        category: herb.category,
+                                        region: herb.region
+                                      }}
+                                    />
+
+                                    <ShareButtons
+                                      title={herb.common_name}
+                                      description={herb.description}
+                                      imageUrl={herb.image_url}
+                                      entityType="herb"
+                                    />
+                                  </div>
             </div>
           </div>
         </Card>
@@ -485,12 +496,20 @@ export default function HerbProfile() {
       </div>
 
       {/* AI Personalized Insight Modal */}
-      {showAIInsight && (
-        <AIPersonalizedInsight 
-          herb={herb} 
-          onClose={() => setShowAIInsight(false)} 
-        />
-      )}
-    </div>
-  );
-}
+                  {showAIInsight && (
+                    <AIPersonalizedInsight 
+                      herb={herb} 
+                      onClose={() => setShowAIInsight(false)} 
+                    />
+                  )}
+
+                  {/* Edit Herb Modal */}
+                  {showEditModal && (
+                    <EditHerbModal
+                      herb={herb}
+                      onClose={() => setShowEditModal(false)}
+                    />
+                  )}
+                </div>
+              );
+            }
