@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker, Store, User, Heart, Calendar } from "lucide-react";
+import { Leaf, Search, BookOpen, Send, Info, Mail, Menu, MessageCircle, Beaker, Store, User, Heart, Calendar, Shield } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -76,10 +76,34 @@ const navigationItems = [
   },
 ];
 
+const adminNavItem = {
+  title: "Admin Dashboard",
+  url: createPageUrl("AdminDashboard"),
+  icon: Shield,
+};
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [showAIAssistant, setShowAIAssistant] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { base44 } = await import("@/api/base44Client");
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } catch (error) {
+        // Not logged in
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const allNavItems = user?.role === 'admin' 
+    ? [...navigationItems, adminNavItem] 
+    : navigationItems;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFFEF9] to-[#F5F1E8]">
@@ -110,7 +134,7 @@ export default function Layout({ children, currentPageName }) {
             </Link>
 
             <nav className="flex items-center gap-4 flex-wrap justify-end">
-              {navigationItems.map((item) => (
+              {allNavItems.map((item) => (
                 <Link
                   key={item.title}
                   to={item.url}
@@ -146,7 +170,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <nav className="flex flex-wrap items-center gap-2">
-              {navigationItems.map((item) => (
+              {allNavItems.map((item) => (
                 <Link
                   key={item.title}
                   to={item.url}
@@ -186,7 +210,7 @@ export default function Layout({ children, currentPageName }) {
         
         {mobileMenuOpen && (
           <nav className="border-t border-[#2D5016]/10 bg-white p-4 space-y-2">
-            {navigationItems.map((item) => (
+            {allNavItems.map((item) => (
               <Link
                 key={item.title}
                 to={item.url}
@@ -243,7 +267,7 @@ export default function Layout({ children, currentPageName }) {
             <div>
               <h3 className="font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                {navigationItems.map((item) => (
+                {allNavItems.map((item) => (
                   <li key={item.title}>
                     <Link
                       to={item.url}
